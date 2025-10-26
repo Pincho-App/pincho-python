@@ -22,7 +22,7 @@ class AsyncWirePusher:
         >>> asyncio.run(main())
     """
 
-    BASE_URL = "https://wirepusher-gateway-1xatwfdc.uc.gateway.dev"
+    BASE_URL = "https://wirepusher.com"
 
     def __init__(
         self,
