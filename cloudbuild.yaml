@@ -1,0 +1,117 @@
+# Cloud Build configuration for WirePusher Python SDK
+# Runs tests, code quality checks, and builds the package
+# To publish to PyPI, create a Git tag (e.g., v1.0.0) and update the final step
+
+steps:
+  # Step 1: Install dependencies
+  - name: 'python:3.11'
+    id: 'install'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -e ".[dev]"
+
+  # Step 2: Run type checking with mypy
+  - name: 'python:3.11'
+    id: 'mypy'
+    entrypoint: 'bash'
+    waitFor: ['install']
+    args:
+      - '-c'
+      - |
+        pip install -e ".[dev]"
+        mypy src/wirepusher
+
+  # Step 3: Check code formatting with black
+  - name: 'python:3.11'
+    id: 'black'
+    entrypoint: 'bash'
+    waitFor: ['install']
+    args:
+      - '-c'
+      - |
+        pip install -e ".[dev]"
+        black --check src/ tests/
+
+  # Step 4: Run linting with ruff
+  - name: 'python:3.11'
+    id: 'ruff'
+    entrypoint: 'bash'
+    waitFor: ['install']
+    args:
+      - '-c'
+      - |
+        pip install -e ".[dev]"
+        ruff check src/ tests/
+
+  # Step 5: Run tests with coverage
+  - name: 'python:3.11'
+    id: 'test'
+    entrypoint: 'bash'
+    waitFor: ['mypy', 'black', 'ruff']
+    args:
+      - '-c'
+      - |
+        pip install -e ".[dev]"
+        pytest --cov=wirepusher --cov-report=term-missing --cov-report=xml
+
+        # Verify minimum coverage threshold (90%)
+        coverage report --fail-under=90
+
+  # Step 6: Build package
+  - name: 'python:3.11'
+    id: 'build'
+    entrypoint: 'bash'
+    waitFor: ['test']
+    args:
+      - '-c'
+      - |
+        pip install build
+        python -m build
+
+        # List built artifacts
+        ls -lh dist/
+
+  # Step 7: Publish to PyPI (ONLY on Git tags, not executed by default)
+  # To enable: Push a Git tag (e.g., git tag v1.0.0 && git push origin v1.0.0)
+  # Requires: pypi-token secret in Secret Manager
+  - name: 'python:3.11'
+    id: 'publish'
+    entrypoint: 'bash'
+    waitFor: ['build']
+    args:
+      - '-c'
+      - |
+        # Only publish if TAG_NAME is set (triggered by Git tag push)
+        if [ -n "$TAG_NAME" ]; then
+          echo "Publishing version $TAG_NAME to PyPI..."
+          pip install twine
+
+          # Fetch PyPI token from Secret Manager
+          PYPI_TOKEN=$(gcloud secrets versions access latest --secret="pypi-token")
+
+          # Upload to PyPI
+          python -m twine upload \
+            --username __token__ \
+            --password "$PYPI_TOKEN" \
+            --non-interactive \
+            dist/*
+
+          echo "Successfully published $TAG_NAME to PyPI!"
+        else
+          echo "Skipping PyPI publish (not a tagged release)"
+        fi
+
+timeout: '600s'
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+# Artifacts to save (optional)
+artifacts:
+  objects:
+    location: 'gs://wirepusher-build-artifacts/python-sdk/$BUILD_ID'
+    paths:
+      - 'dist/*'
+      - 'coverage.xml'
