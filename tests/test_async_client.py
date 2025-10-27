@@ -16,22 +16,39 @@ class TestAsyncWirePusher:
     """Test suite for AsyncWirePusher asynchronous client."""
 
     def test_init(self) -> None:
-        """Test client initialization."""
-        client = AsyncWirePusher(token="wpt_test123", user_id="user123")
-        assert client.token == "wpt_test123"
+        """Test client initialization with user_id."""
+        client = AsyncWirePusher(user_id="user123")
+        assert client.token is None
         assert client.user_id == "user123"
         assert client.timeout == 30.0
         assert client.base_url == AsyncWirePusher.BASE_URL
 
+    def test_init_with_token(self) -> None:
+        """Test client initialization with token."""
+        client = AsyncWirePusher(token="wpt_test123")
+        assert client.token == "wpt_test123"
+        assert client.user_id is None
+        assert client.timeout == 30.0
+        assert client.base_url == AsyncWirePusher.BASE_URL
+
+    def test_init_both_raises_error(self) -> None:
+        """Test that providing both token and user_id raises ValueError."""
+        with pytest.raises(ValueError, match="Cannot specify both"):
+            AsyncWirePusher(token="wpt_test123", user_id="user123")
+
+    def test_init_neither_raises_error(self) -> None:
+        """Test that providing neither token nor user_id raises ValueError."""
+        with pytest.raises(ValueError, match="Must specify either"):
+            AsyncWirePusher()
+
     def test_init_custom_timeout(self) -> None:
         """Test client initialization with custom timeout."""
-        client = AsyncWirePusher(token="wpt_test123", user_id="user123", timeout=60.0)
+        client = AsyncWirePusher(user_id="user123", timeout=60.0)
         assert client.timeout == 60.0
 
     def test_init_custom_base_url(self) -> None:
         """Test client initialization with custom base URL."""
         client = AsyncWirePusher(
-            token="wpt_test123",
             user_id="user123",
             base_url="https://custom.example.com",
         )
@@ -40,8 +57,8 @@ class TestAsyncWirePusher:
     @pytest.mark.asyncio
     async def test_context_manager(self) -> None:
         """Test client as async context manager."""
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
-            assert client.token == "wpt_test123"
+        async with AsyncWirePusher(user_id="user123") as client:
+            assert client.user_id == "user123"
         # Client should be closed after exiting context
 
     @pytest.mark.asyncio
@@ -54,7 +71,7 @@ class TestAsyncWirePusher:
             status_code=200,
         )
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             response = await client.send("Test Title", "Test message")
             assert response.status == "success"
             assert response.message == "Notification sent successfully"
@@ -69,7 +86,7 @@ class TestAsyncWirePusher:
             status_code=200,
         )
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             response = await client.send(
                 "Test Title",
                 "Test message",
@@ -96,7 +113,7 @@ class TestAsyncWirePusher:
             status_code=401,
         )
 
-        async with AsyncWirePusher(token="invalid_token", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             with pytest.raises(AuthenticationError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "Invalid token or user ID" in str(exc_info.value)
@@ -111,7 +128,7 @@ class TestAsyncWirePusher:
             status_code=400,
         )
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             with pytest.raises(ValidationError) as exc_info:
                 await client.send("", "Test message")
             assert "Invalid parameters" in str(exc_info.value)
@@ -127,7 +144,7 @@ class TestAsyncWirePusher:
             status_code=403,
         )
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             with pytest.raises(AuthenticationError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "Forbidden" in str(exc_info.value)
@@ -142,7 +159,7 @@ class TestAsyncWirePusher:
             status_code=404,
         )
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="invalid_user") as client:
+        async with AsyncWirePusher(user_id="invalid_user") as client:
             with pytest.raises(ValidationError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "User not found" in str(exc_info.value)
@@ -157,7 +174,7 @@ class TestAsyncWirePusher:
             status_code=500,
         )
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             with pytest.raises(WirePusherError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "API error (500)" in str(exc_info.value)
@@ -167,7 +184,7 @@ class TestAsyncWirePusher:
         """Test network error handling."""
         httpx_mock.add_exception(httpx.ConnectError("Connection failed"))
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             with pytest.raises(WirePusherError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "Network error" in str(exc_info.value)
@@ -177,7 +194,7 @@ class TestAsyncWirePusher:
         """Test timeout error handling."""
         httpx_mock.add_exception(httpx.TimeoutException("Request timed out"))
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123", timeout=1.0) as client:
+        async with AsyncWirePusher(user_id="user123", timeout=1.0) as client:
             with pytest.raises(WirePusherError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "Network error" in str(exc_info.value)
@@ -192,7 +209,7 @@ class TestAsyncWirePusher:
             status_code=200,
         )
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             with pytest.raises(WirePusherError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "Unexpected error" in str(exc_info.value)
@@ -207,7 +224,7 @@ class TestAsyncWirePusher:
             status_code=200,
         )
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             response = await client.send("Test Title", "Test message")
             assert response.status == "unknown"
             assert response.message == ""
@@ -226,7 +243,7 @@ class TestAsyncWirePusher:
                 status_code=200,
             )
 
-        async with AsyncWirePusher(token="wpt_test123", user_id="user123") as client:
+        async with AsyncWirePusher(user_id="user123") as client:
             # Send 3 notifications concurrently
             tasks = [client.send(f"Title {i}", f"Message {i}") for i in range(3)]
             responses = await asyncio.gather(*tasks)
