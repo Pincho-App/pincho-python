@@ -17,12 +17,13 @@ def main():
 
     # Get credentials from environment variables (recommended)
     user_id = os.getenv('WIREPUSHER_USER_ID')
-    team_token = os.getenv('WIREPUSHER_TOKEN')  # Optional, for team notifications
     encryption_password = os.getenv('WIREPUSHER_ENCRYPTION_PASSWORD')
 
     if not user_id:
         print("Error: WIREPUSHER_USER_ID environment variable not set")
         print("Set it with: export WIREPUSHER_USER_ID='your_user_id'")
+        print("\nAlternatively, you can use a team token instead:")
+        print("export WIREPUSHER_TOKEN='wpt_your_token'")
         return
 
     if not encryption_password:
@@ -54,20 +55,19 @@ def main():
         )
         print(f"  Status: {response.status}\n")
 
-    # Example 3: Team encrypted notification (if team_token provided)
-    if team_token:
-        print("Example 3: Sending encrypted notification to team...")
-        with WirePusher(token=team_token) as client:
-            response = client.send(
-                title='Team Security Notice',
-                message='API key rotation completed. Old keys revoked.',
-                type='team-secure',
-                tags=['team', 'security'],
-                encryption_password=encryption_password
-            )
-            print(f"  Status: {response.status}\n")
-    else:
-        print("Example 3: Skipped (WIREPUSHER_TOKEN not set)\n")
+    # Example 3: Encrypted notification with image and action URL
+    print("Example 3: Encrypted notification with additional metadata...")
+    with WirePusher(user_id=user_id) as client:
+        response = client.send(
+            title='Payment Alert',
+            message='Your subscription has been renewed for $9.99',
+            type='billing',
+            tags=['payment', 'subscription'],
+            encryption_password=encryption_password,
+            image_url='https://example.com/payment-icon.png',
+            action_url='https://example.com/billing/history'
+        )
+        print(f"  Status: {response.status}\n")
 
     # Example 4: Error handling with encryption
     print("Example 4: Error handling...")

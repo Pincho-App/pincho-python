@@ -12,35 +12,58 @@ from wirepusher.models import NotificationRequest, NotificationResponse
 class WirePusher:
     """Synchronous WirePusher client for v1 API.
 
-    This client uses WirePusher API tokens for authentication, making it ideal for
-    automation, scripts, data pipelines, and server-side applications.
+    This client supports both team tokens (for team-wide notifications) and user IDs
+    (for personal notifications). Token and user_id are mutually exclusive.
 
     Example:
-        >>> client = WirePusher(token='wpt_abc123', user_id='user123')
-        >>> client.send('Build Complete', 'v1.2.3 deployed successfully')
+        >>> # Team notifications
+        >>> client = WirePusher(token='wpt_abc123...')
+        >>> client.send('Team Alert', 'Server maintenance scheduled')
 
-        >>> # Using context manager (recommended)
-        >>> with WirePusher(token='wpt_abc123', user_id='user123') as client:
-        ...     client.send('Alert', 'Server is down')
+        >>> # Personal notifications (recommended for most use cases)
+        >>> with WirePusher(user_id='user_abc123') as client:
+        ...     client.send('Personal Alert', 'Your task is due soon')
     """
 
     BASE_URL = "https://wirepusher.com"
 
     def __init__(
         self,
-        token: str,
-        user_id: str,
+        token: Optional[str] = None,
+        user_id: Optional[str] = None,
         timeout: float = 30.0,
         base_url: Optional[str] = None,
     ):
         """Initialize WirePusher client.
 
         Args:
-            token: WirePusher API token (get from app settings)
-            user_id: WirePusher user ID
+            token: WirePusher team token (mutually exclusive with user_id)
+            user_id: WirePusher user ID (mutually exclusive with token)
             timeout: Request timeout in seconds (default: 30.0)
             base_url: Optional custom base URL (mainly for testing)
+
+        Raises:
+            ValueError: If both token and user_id are provided, or if neither is provided
+
+        Examples:
+            >>> # Team notifications
+            >>> client = WirePusher(token='wpt_abc123...')
+
+            >>> # Personal notifications
+            >>> client = WirePusher(user_id='user_abc123')
         """
+        # Validate mutual exclusivity
+        if token and user_id:
+            raise ValueError(
+                "Cannot specify both 'token' and 'user_id' - they are mutually exclusive. "
+                "Use 'token' for team notifications or 'user_id' for personal notifications."
+            )
+        if not token and not user_id:
+            raise ValueError(
+                "Must specify either 'token' or 'user_id'. "
+                "Use 'token' for team notifications or 'user_id' for personal notifications."
+            )
+
         self.token = token
         self.user_id = user_id
         self.timeout = timeout

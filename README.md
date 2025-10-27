@@ -28,8 +28,8 @@ pip install wirepusher
 ```python
 from wirepusher import WirePusher
 
-# Initialize client with your WirePusher token and user ID
-client = WirePusher(token='wpt_your_token', user_id='your_user_id')
+# Initialize client with your user ID (for personal notifications)
+client = WirePusher(user_id='your_user_id')
 
 # Send a simple notification
 response = client.send('Build Complete', 'v1.2.3 deployed successfully')
@@ -44,7 +44,7 @@ client.close()
 ```python
 from wirepusher import WirePusher
 
-with WirePusher(token='wpt_your_token', user_id='your_user_id') as client:
+with WirePusher(user_id='your_user_id') as client:
     client.send('Server Alert', 'CPU usage is at 90%')
     # Client automatically closed after exiting the context
 ```
@@ -56,7 +56,7 @@ import asyncio
 from wirepusher import AsyncWirePusher
 
 async def send_notification():
-    async with AsyncWirePusher(token='wpt_your_token', user_id='your_user_id') as client:
+    async with AsyncWirePusher(user_id='your_user_id') as client:
         response = await client.send('Build Complete', 'Deployment finished')
         print(response.status)
 
@@ -68,7 +68,7 @@ asyncio.run(send_notification())
 ```python
 from wirepusher import WirePusher
 
-with WirePusher(token='wpt_your_token', user_id='your_user_id') as client:
+with WirePusher(user_id='your_user_id') as client:
     # Send notification with all optional parameters
     response = client.send(
         title='Deploy Complete',
@@ -189,10 +189,12 @@ with WirePusher(user_id='your_user_id') as client:
 Initialize a synchronous WirePusher client.
 
 **Parameters:**
-- `token` (str): WirePusher API token (get from app settings)
-- `user_id` (str): WirePusher user ID
+- `token` (str, optional): WirePusher team token (mutually exclusive with `user_id`)
+- `user_id` (str, optional): WirePusher user ID (mutually exclusive with `token`)
 - `timeout` (float, optional): Request timeout in seconds (default: 30.0)
 - `base_url` (str, optional): Custom base URL (mainly for testing)
+
+**Note:** You must specify either `token` OR `user_id`, not both.
 
 **Methods:**
 
@@ -227,7 +229,7 @@ Initialize an asynchronous WirePusher client. Has the same parameters and method
 
 **Example:**
 ```python
-async with AsyncWirePusher(token='wpt_token', user_id='user_id') as client:
+async with AsyncWirePusher(user_id='user_id') as client:
     response = await client.send('Title', 'Message')
 ```
 
@@ -244,7 +246,7 @@ from wirepusher.exceptions import (
 )
 
 try:
-    with WirePusher(token='invalid', user_id='user123') as client:
+    with WirePusher(user_id='user123') as client:
         client.send('Test', 'Message')
 except AuthenticationError as e:
     print(f"Authentication failed: {e}")
@@ -268,7 +270,7 @@ except WirePusherError as e:
 from wirepusher import WirePusher
 
 def notify_build_status(status, details):
-    with WirePusher(token='wpt_token', user_id='user_id') as client:
+    with WirePusher(user_id='user_id') as client:
         title = f"Build {status}"
         client.send(
             title=title,
@@ -292,7 +294,7 @@ def check_server_health():
     memory = psutil.virtual_memory().percent
 
     if cpu > 80 or memory > 80:
-        with WirePusher(token='wpt_token', user_id='user_id') as client:
+        with WirePusher(user_id='user_id') as client:
             client.send(
                 title='Server Alert',
                 message=f'CPU: {cpu}%, Memory: {memory}%',
@@ -311,7 +313,7 @@ async def process_data_pipeline():
     # Your data processing logic here
     records_processed = 10000
 
-    async with AsyncWirePusher(token='wpt_token', user_id='user_id') as client:
+    async with AsyncWirePusher(user_id='user_id') as client:
         await client.send(
             title='ETL Job Complete',
             message=f'Processed {records_processed:,} records',
@@ -334,7 +336,7 @@ app = Flask(__name__)
 def deploy():
     # Deployment logic here
 
-    with WirePusher(token='wpt_token', user_id='user_id') as client:
+    with WirePusher(user_id='user_id') as client:
         client.send(
             title='Deployment Started',
             message='Deploying application to production',

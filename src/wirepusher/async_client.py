@@ -12,13 +12,14 @@ from wirepusher.models import NotificationRequest, NotificationResponse
 class AsyncWirePusher:
     """Asynchronous WirePusher client for v1 API.
 
-    This client uses WirePusher API tokens for authentication and provides async/await
-    support for modern Python applications using asyncio.
+    This client supports both team tokens (for team-wide notifications) and user IDs
+    (for personal notifications). Token and user_id are mutually exclusive.
 
     Example:
         >>> import asyncio
         >>> async def main():
-        ...     async with AsyncWirePusher(token='wpt_abc123', user_id='user123') as client:
+        ...     # Personal notifications
+        ...     async with AsyncWirePusher(user_id='user_abc123') as client:
         ...         await client.send('Build Complete', 'Deployed successfully')
         >>> asyncio.run(main())
     """
@@ -27,19 +28,41 @@ class AsyncWirePusher:
 
     def __init__(
         self,
-        token: str,
-        user_id: str,
+        token: Optional[str] = None,
+        user_id: Optional[str] = None,
         timeout: float = 30.0,
         base_url: Optional[str] = None,
     ):
         """Initialize async WirePusher client.
 
         Args:
-            token: WirePusher API token (get from app settings)
-            user_id: WirePusher user ID
+            token: WirePusher team token (mutually exclusive with user_id)
+            user_id: WirePusher user ID (mutually exclusive with token)
             timeout: Request timeout in seconds (default: 30.0)
             base_url: Optional custom base URL (mainly for testing)
+
+        Raises:
+            ValueError: If both token and user_id are provided, or if neither is provided
+
+        Examples:
+            >>> # Team notifications
+            >>> client = AsyncWirePusher(token='wpt_abc123...')
+
+            >>> # Personal notifications
+            >>> client = AsyncWirePusher(user_id='user_abc123')
         """
+        # Validate mutual exclusivity
+        if token and user_id:
+            raise ValueError(
+                "Cannot specify both 'token' and 'user_id' - they are mutually exclusive. "
+                "Use 'token' for team notifications or 'user_id' for personal notifications."
+            )
+        if not token and not user_id:
+            raise ValueError(
+                "Must specify either 'token' or 'user_id'. "
+                "Use 'token' for team notifications or 'user_id' for personal notifications."
+            )
+
         self.token = token
         self.user_id = user_id
         self.timeout = timeout
