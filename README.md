@@ -83,6 +83,105 @@ with WirePusher(token='wpt_your_token', user_id='your_user_id') as client:
     print(f"Message: {response.message}")
 ```
 
+## Authentication
+
+WirePusher supports two authentication methods for sending notifications:
+
+### Team Tokens (Recommended for Teams)
+
+Team tokens (starting with `wpt_`) send notifications to ALL members of a team.
+
+```python
+from wirepusher import WirePusher
+
+# Send to all team members
+with WirePusher(token='wpt_abc123xyz...') as client:
+    client.send('Team Alert', 'Server maintenance in 1 hour')
+```
+
+**Use cases:**
+- Team-wide alerts and announcements
+- Shared project notifications
+- Collaborative workflows
+
+### User ID (Personal Notifications)
+
+User IDs send notifications to a specific user's devices only.
+
+```python
+from wirepusher import WirePusher
+
+# Send to specific user
+with WirePusher(user_id='user_abc123') as client:
+    client.send('Personal Reminder', 'Your task is due tomorrow')
+```
+
+**Use cases:**
+- Personal notifications
+- User-specific alerts
+- Individual reminders
+
+**Note:** Team tokens and user IDs are mutually exclusive - use one or the other, not both.
+
+## Encrypted Notifications
+
+WirePusher supports AES-128-CBC encryption for secure message delivery. Only the message content is encrypted; metadata (title, type, tags) remains unencrypted for filtering and display.
+
+### Setup
+
+1. Create a notification type in the WirePusher app
+2. Set an encryption password for that type
+3. Use the same password when sending encrypted notifications
+
+### Example
+
+```python
+from wirepusher import WirePusher
+
+with WirePusher(user_id='your_user_id') as client:
+    client.send(
+        title='Secure Message',              # Not encrypted (for display)
+        message='Sensitive information here', # Encrypted
+        type='secure',                        # Must match app type with password
+        encryption_password='your_password'   # Must match app configuration
+    )
+```
+
+### What's Encrypted
+
+- ✅ Message content only
+- ❌ Title, type, tags, image_url, action_url (unencrypted for filtering/display)
+
+### Security Notes
+
+- Message content encrypted using AES-128-CBC
+- 16-byte random IV generated for each message
+- Password must match the type configuration in the app
+- Use strong passwords (minimum 12 characters)
+- Store passwords securely (environment variables, secret managers)
+
+### Advanced Encryption Example
+
+```python
+from wirepusher import WirePusher
+import os
+
+# Store password in environment variable
+encryption_password = os.getenv('WIREPUSHER_ENCRYPTION_PASSWORD')
+
+with WirePusher(user_id='your_user_id') as client:
+    # Send encrypted notification
+    response = client.send(
+        title='Security Alert',
+        message='Unauthorized access attempt detected from IP 192.168.1.100',
+        type='security',
+        tags=['critical', 'security'],
+        encryption_password=encryption_password
+    )
+
+    print(f"Encrypted notification sent: {response.status}")
+```
+
 ## API Reference
 
 ### `WirePusher` (Synchronous Client)
@@ -108,6 +207,7 @@ Send a notification via WirePusher API.
 - `tags` (list[str], optional): List of tags (max 10 tags, max 50 characters each)
 - `image_url` (str, optional): Image URL to display with notification
 - `action_url` (str, optional): URL to open when notification is tapped
+- `encryption_password` (str, optional): Password for AES-128-CBC encryption (must match type configuration in app)
 
 **Returns:**
 - `NotificationResponse`: Object with `status` and `message` fields

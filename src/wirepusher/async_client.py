@@ -4,6 +4,7 @@ from typing import List, Optional
 
 import httpx
 
+from wirepusher.crypto import encrypt_message, generate_iv
 from wirepusher.exceptions import AuthenticationError, ValidationError, WirePusherError
 from wirepusher.models import NotificationRequest, NotificationResponse
 
@@ -66,6 +67,7 @@ class AsyncWirePusher:
         tags: Optional[List[str]] = None,
         image_url: Optional[str] = None,
         action_url: Optional[str] = None,
+        encryption_password: Optional[str] = None,
     ) -> NotificationResponse:
         """Send a notification via WirePusher v1 API (async).
 
@@ -76,6 +78,8 @@ class AsyncWirePusher:
             tags: Optional list of tags (max 10 tags, max 50 characters each)
             image_url: Optional image URL to display with notification
             action_url: Optional URL to open when notification is tapped
+            encryption_password: Optional password for AES-128-CBC encryption
+                (must match type configuration in app)
 
         Returns:
             NotificationResponse with status and message
@@ -94,16 +98,34 @@ class AsyncWirePusher:
             ...         tags=['production', 'release']
             ...     )
             ...     print(response.status)  # 'success'
+
+        Example with encryption:
+            >>> async with AsyncWirePusher(user_id='user123') as client:
+            ...     response = await client.send(
+            ...         'Secure Message',
+            ...         'Sensitive data here',
+            ...         type='secure',
+            ...         encryption_password='your_password'
+            ...     )
         """
+        # Handle encryption if password provided
+        final_message = message
+        iv_hex: Optional[str] = None
+
+        if encryption_password:
+            iv_bytes, iv_hex = generate_iv()
+            final_message = encrypt_message(message, encryption_password, iv_bytes)
+
         request = NotificationRequest(
             title=title,
-            message=message,
+            message=final_message,
             id=self.user_id,
             token=self.token,
             type=type,
             tags=tags,
             imageURL=image_url,
             actionURL=action_url,
+            iv=iv_hex,
         )
 
         try:

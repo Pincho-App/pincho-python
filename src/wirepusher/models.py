@@ -17,6 +17,7 @@ class NotificationRequest:
         tags: Optional list of tags (max 10 tags, max 50 characters each)
         imageURL: Optional image URL to display (max 2,000 characters)
         actionURL: Optional URL to open when tapped (max 2,000 characters)
+        iv: Optional initialization vector for encrypted messages (hex string, 32 chars)
     """
 
     title: str
@@ -27,6 +28,7 @@ class NotificationRequest:
     tags: Optional[List[str]] = None
     imageURL: Optional[str] = None
     actionURL: Optional[str] = None
+    iv: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary, excluding None values.
