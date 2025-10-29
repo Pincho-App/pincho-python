@@ -30,7 +30,7 @@ class WirePusher:
     def __init__(
         self,
         token: Optional[str] = None,
-        user_id: Optional[str] = None,
+        user_id: Optional[str] = None,  # @deprecated Legacy authentication. Use token parameter instead.
         timeout: float = 30.0,
         base_url: Optional[str] = None,
     ):
@@ -39,6 +39,7 @@ class WirePusher:
         Args:
             token: WirePusher team token (mutually exclusive with user_id)
             user_id: WirePusher user ID (mutually exclusive with token)
+                @deprecated Legacy authentication. Use token parameter instead.
             timeout: Request timeout in seconds (default: 30.0)
             base_url: Optional custom base URL (mainly for testing)
 
@@ -142,7 +143,7 @@ class WirePusher:
         request = NotificationRequest(
             title=title,
             message=final_message,
-            id=self.user_id,
+            id=self.user_id,  # @deprecated Legacy authentication. Use token parameter instead.
             token=self.token,
             type=type,
             tags=tags,

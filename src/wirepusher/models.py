@@ -12,6 +12,7 @@ class NotificationRequest:
         title: Notification title (max 250 characters)
         message: Notification message body (max 10,000 characters)
         id: User ID (mutually exclusive with token)
+            @deprecated Legacy authentication. Use token parameter instead.
         token: Team token (mutually exclusive with id)
         type: Optional notification type for filtering/organization (max 50 characters)
         tags: Optional list of tags (max 10 tags, max 50 characters each)
@@ -22,7 +23,7 @@ class NotificationRequest:
 
     title: str
     message: str
-    id: Optional[str] = None
+    id: Optional[str] = None  # @deprecated Legacy authentication. Use token parameter instead.
     token: Optional[str] = None
     type: Optional[str] = None
     tags: Optional[List[str]] = None
