@@ -1,4 +1,4 @@
-# Cloud Build configuration for WirePusher Python SDK
+# Cloud Build configuration for WirePusher Python library
 # Runs tests, code quality checks, and builds the package
 # To publish to PyPI, create a Git tag (e.g., v1.0.0) and update the final step
 

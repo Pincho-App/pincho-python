@@ -1,21 +1,20 @@
-"""Basic example of using WirePusher SDK."""
+"""Basic example of using WirePusher library."""
 
 import os
 from wirepusher import WirePusher
 
-# Get credentials from environment variables
-TOKEN = os.getenv("WIREPUSHER_TOKEN", "wpt_your_token_here")
-USER_ID = os.getenv("WIREPUSHER_USER_ID", "your_user_id_here")
+# Get token from environment variable
+TOKEN = os.getenv("WIREPUSHER_TOKEN", "abc12345")
 
 
 def main():
     """Send a basic notification using WirePusher."""
     # Using context manager (recommended)
-    with WirePusher(token=TOKEN, user_id=USER_ID) as client:
+    with WirePusher(token=TOKEN) as client:
         # Simple notification
         response = client.send(
             title="Hello from Python!",
-            message="This is a test notification from the WirePusher Python SDK.",
+            message="This is a test notification from the WirePusher Python library.",
         )
 
         print(f"Status: {response.status}")

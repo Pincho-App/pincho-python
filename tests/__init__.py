@@ -1,1 +1,1 @@
-"""Tests for WirePusher Python SDK."""
+"""Tests for WirePusher Python library."""

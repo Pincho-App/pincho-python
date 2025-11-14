@@ -7,10 +7,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **NotifAI endpoint**: AI-powered notification generation using Gemini
+  - `notifai()` method for both sync and async clients
+  - Automatically generates title, message, tags, and action URL from free-form text
+  - Optional type override parameter
+- **Automatic retry logic** with exponential backoff
+  - Default: 3 retries (1s, 2s, 4s, 8s delays)
+  - Configurable via `max_retries` parameter
+  - Special handling for rate limits (5s, 10s, 20s delays)
+  - Retries on: network errors, 5xx errors, 429 (rate limit)
+  - Does not retry: 400, 401, 403, 404 (client errors)
+- **Enhanced error categorization**
+  - New exceptions: `RateLimitError`, `ServerError`, `NetworkError`
+  - `is_retryable` property on all exceptions
+  - Better error messages with actionable suggestions
+- **Tag normalization and validation**
+  - Automatic lowercase conversion
+  - Whitespace trimming
+  - Duplicate removal (case-insensitive)
+  - Character validation (alphanumeric, hyphens, underscores only)
+- **Python logging integration**
+  - Uses standard `logging` module (zero dependencies)
+  - DEBUG, INFO, WARNING, ERROR levels
+  - Shows: initialization, retry attempts, request progress, errors
+- **Comprehensive documentation updates**
+  - Updated README with NotifAI, retry logic, and logging sections
+  - Enhanced API reference
+  - Improved error handling guide
+  - Python-adapted CONTRIBUTING.md (concise, 162 lines)
+  - Updated CODE_OF_CONDUCT.md (concise, 48 lines)
+
+### Changed
+- **BREAKING**: Removed deprecated `device_id` / `user_id` authentication
+  - Use `token` parameter only (simpler API)
+  - Constructor now requires `token` parameter
+- **Sync client architecture**: Now a lightweight wrapper around async client
+  - Follows modern Python library patterns (like httpx)
+  - Reduces code duplication
+  - Easier to maintain
+
+### Technical Improvements
+- New `validation.py` module for input validation
+- Enhanced exception hierarchy with retry categorization
+- Async-first implementation (sync wraps async)
+- Improved type hints throughout
+- Added validation tests (comprehensive tag normalization tests)
+
+### Migration Guide
+If upgrading from v1.0.0:
+
+**Before (v1.0.0):**
+```python
+# Old: device_id or user_id parameter
+client = WirePusher(user_id='user_abc123')
+client = WirePusher(device_id='device_abc123')  # deprecated
+```
+
+**After (v2.0.0):**
+```python
+# New: token-only authentication
+client = WirePusher(token='abc12345')
+```
+
+**New features available:**
+```python
+# NotifAI - AI-powered notifications
+response = client.notifai('deployment finished, v2.1.3 is live')
+
+# Configurable retries
+client = WirePusher(token='abc12345', max_retries=5)
+
+# Debug logging
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
+
 ## [1.0.0] - 2025-10-26
 
 ### Added
-- Initial release of WirePusher Python SDK
+- Initial release of WirePusher Python library
 - Synchronous client (`WirePusher`) with context manager support
 - Asynchronous client (`AsyncWirePusher`) with asyncio support
 - httpx-based HTTP client with HTTP/2 support

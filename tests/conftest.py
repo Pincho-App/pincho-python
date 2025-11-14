@@ -1,4 +1,4 @@
-"""Pytest configuration and fixtures for WirePusher SDK tests."""
+"""Pytest configuration and fixtures for WirePusher library tests."""
 
 import pytest
 
@@ -6,13 +6,7 @@ import pytest
 @pytest.fixture
 def test_token() -> str:
     """Test WirePusher API token."""
-    return "wpt_test123"
-
-
-@pytest.fixture
-def test_user_id() -> str:
-    """Test user ID."""
-    return "user123"
+    return "abc12345"
 
 
 @pytest.fixture

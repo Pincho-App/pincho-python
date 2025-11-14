@@ -6,7 +6,7 @@
 
 Steps to reproduce the behavior:
 
-1. Install SDK version ...
+1. Install library version ...
 2. Run code: ...
 3. See error ...
 
@@ -36,7 +36,7 @@ from wirepusher import WirePusher
 
 - **OS**: [e.g., macOS 14.0, Ubuntu 22.04, Windows 11]
 - **Python version**: [e.g., 3.11.6]
-- **SDK version**: [e.g., 1.0.0]
+- **Library version**: [e.g., 1.0.0]
 - **httpx version**: [e.g., 0.28.1]
 - **Installation method**: [e.g., pip, poetry, conda]
 
@@ -51,7 +51,7 @@ from wirepusher import WirePusher
 ## Checklist
 
 - [ ] I have searched existing issues to ensure this is not a duplicate
-- [ ] I have tested with the latest version of the SDK
+- [ ] I have tested with the latest version of the library
 - [ ] I have provided a minimal, reproducible example
 - [ ] I have included the full error traceback
 
