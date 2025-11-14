@@ -48,9 +48,9 @@ Instead, please report security vulnerabilities by:
 
 ### Security Best Practices for Users
 
-When using the WirePusher Python SDK:
+When using the WirePusher Python library:
 
-1. **Keep dependencies updated**: Regularly update the SDK and its dependencies
+1. **Keep dependencies updated**: Regularly update the library and its dependencies
    ```bash
    pip install --upgrade wirepusher
    ```
@@ -61,7 +61,7 @@ When using the WirePusher Python SDK:
    token = os.getenv("WIREPUSHER_TOKEN")
 
    # Bad: Hardcoded credentials
-   token = "wpt_your_token_here"  # Don't do this!
+   token = "abc12345"  # Don't do this!
    ```
 
 3. **Use virtual environments**: Isolate your project dependencies
@@ -72,7 +72,7 @@ When using the WirePusher Python SDK:
 
 4. **Validate input**: If accepting user input for notifications, sanitize and validate
 
-5. **Use HTTPS**: The SDK uses HTTPS by default - don't override with HTTP
+5. **Use HTTPS**: The library uses HTTPS by default - don't override with HTTP
 
 6. **Monitor for updates**: Watch the repository for security advisories
 
@@ -80,20 +80,20 @@ When using the WirePusher Python SDK:
 
 #### API Token Security
 
-- WirePusher API tokens (`wpt_*`) are sensitive credentials
+- WirePusher API tokens (8-character strings) are sensitive credentials
 - Store them securely (environment variables, secret managers)
 - Rotate tokens if compromised
 - Use token-specific permissions when available
 
 #### Network Security
 
-- The SDK communicates over HTTPS with TLS encryption
+- The library communicates over HTTPS with TLS encryption
 - Ensure your environment doesn't disable certificate verification
 - Be cautious when using custom `base_url` parameter (testing only)
 
 #### Dependency Security
 
-The SDK has minimal dependencies:
+The library has minimal dependencies:
 - `httpx >= 0.24.0` - Actively maintained, security-focused HTTP client
 
 We monitor dependencies for known vulnerabilities and update promptly.

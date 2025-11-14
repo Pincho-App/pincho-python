@@ -1,4 +1,4 @@
-"""Encryption utilities for WirePusher SDK.
+"""Encryption utilities for WirePusher library.
 
 Provides AES-128-CBC encryption with custom Base64 encoding to match
 the WirePusher app's decryption implementation.

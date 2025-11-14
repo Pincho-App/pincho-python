@@ -1,75 +1,75 @@
 """Synchronous WirePusher client."""
 
+import asyncio
+import logging
 from typing import List, Optional
 
-import httpx
+from wirepusher.async_client import AsyncWirePusher
+from wirepusher.models import NotifAIResponse, NotificationResponse
 
-from wirepusher.crypto import encrypt_message, generate_iv
-from wirepusher.exceptions import AuthenticationError, ValidationError, WirePusherError
-from wirepusher.models import NotificationRequest, NotificationResponse
+logger = logging.getLogger("wirepusher")
 
 
 class WirePusher:
     """Synchronous WirePusher client for v1 API.
 
-    This client supports both team tokens (for team-wide notifications) and user IDs
-    (for personal notifications). Token and user_id are mutually exclusive.
+    This is a synchronous wrapper around AsyncWirePusher, providing a blocking
+    API for environments that don't use async/await.
+
+    Features:
+        - Automatic retry logic with exponential backoff
+        - Tag normalization and validation
+        - Message encryption support
+        - Comprehensive error handling
+        - Debug logging support
 
     Example:
-        >>> # Team notifications
-        >>> client = WirePusher(token='wpt_abc123...')
+        >>> # Basic usage
+        >>> client = WirePusher(token='abc12345')
         >>> client.send('Team Alert', 'Server maintenance scheduled')
+        >>> client.close()
 
-        >>> # Personal notifications (recommended for most use cases)
-        >>> with WirePusher(user_id='user_abc123') as client:
+        >>> # Context manager (recommended)
+        >>> with WirePusher(token='abc12345') as client:
         ...     client.send('Personal Alert', 'Your task is due soon')
     """
 
-    BASE_URL = "https://wirepusher.com"
-
     def __init__(
         self,
-        token: Optional[str] = None,
-        user_id: Optional[str] = None,  # @deprecated Legacy authentication. Use token parameter instead.
+        token: str,
         timeout: float = 30.0,
+        max_retries: int = 3,
         base_url: Optional[str] = None,
     ):
         """Initialize WirePusher client.
 
         Args:
-            token: WirePusher team token (mutually exclusive with user_id)
-            user_id: WirePusher user ID (mutually exclusive with token)
-                @deprecated Legacy authentication. Use token parameter instead.
+            token: WirePusher API token (required)
             timeout: Request timeout in seconds (default: 30.0)
+            max_retries: Maximum number of retry attempts (default: 3, set to 0 to disable)
             base_url: Optional custom base URL (mainly for testing)
 
         Raises:
-            ValueError: If both token and user_id are provided, or if neither is provided
+            ValueError: If token is not provided
 
         Examples:
-            >>> # Team notifications
-            >>> client = WirePusher(token='wpt_abc123...')
+            >>> # Basic usage
+            >>> client = WirePusher(token='abc12345')
 
-            >>> # Personal notifications
-            >>> client = WirePusher(user_id='user_abc123')
+            >>> # With custom settings
+            >>> client = WirePusher(
+            ...     token='abc12345',
+            ...     timeout=60.0,
+            ...     max_retries=5
+            ... )
         """
-        # Validate mutual exclusivity
-        if token and user_id:
-            raise ValueError(
-                "Cannot specify both 'token' and 'user_id' - they are mutually exclusive. "
-                "Use 'token' for team notifications or 'user_id' for personal notifications."
-            )
-        if not token and not user_id:
-            raise ValueError(
-                "Must specify either 'token' or 'user_id'. "
-                "Use 'token' for team notifications or 'user_id' for personal notifications."
-            )
-
-        self.token = token
-        self.user_id = user_id
-        self.timeout = timeout
-        self.base_url = base_url or self.BASE_URL
-        self._client = httpx.Client(timeout=timeout)
+        self._async_client = AsyncWirePusher(
+            token=token,
+            timeout=timeout,
+            max_retries=max_retries,
+            base_url=base_url,
+        )
+        self._loop: Optional[asyncio.AbstractEventLoop] = None
 
     def __enter__(self) -> "WirePusher":
         """Context manager entry."""
@@ -81,7 +81,7 @@ class WirePusher:
 
     def close(self) -> None:
         """Close the HTTP client and release resources."""
-        self._client.close()
+        self._run_async(self._async_client.close())
 
     def send(
         self,
@@ -97,10 +97,10 @@ class WirePusher:
         """Send a notification via WirePusher v1 API.
 
         Args:
-            title: Notification title (max 250 characters)
-            message: Notification message body (max 10,000 characters)
+            title: Notification title
+            message: Notification message body
             type: Optional notification type for filtering/organization
-            tags: Optional list of tags (max 10 tags, max 50 characters each)
+            tags: Optional list of tags (will be normalized: lowercased, trimmed, deduplicated)
             image_url: Optional image URL to display with notification
             action_url: Optional URL to open when notification is tapped
             encryption_password: Optional password for AES-128-CBC encryption
@@ -110,12 +110,15 @@ class WirePusher:
             NotificationResponse with status and message
 
         Raises:
-            AuthenticationError: Invalid token or user ID
+            AuthenticationError: Invalid token
             ValidationError: Invalid parameters (missing required fields, etc.)
-            WirePusherError: Other API errors (network issues, server errors, etc.)
+            RateLimitError: Rate limit exceeded (429)
+            ServerError: Server error (5xx)
+            NetworkError: Network communication failure
+            WirePusherError: Other API errors
 
         Example:
-            >>> client = WirePusher(token='wpt_abc123', user_id='user123')
+            >>> client = WirePusher(token='abc12345')
             >>> response = client.send(
             ...     'Deploy Complete',
             ...     'v1.2.3 deployed to production',
@@ -125,78 +128,92 @@ class WirePusher:
             >>> print(response.status)  # 'success'
 
         Example with encryption:
-            >>> response = client.send(
-            ...     'Secure Message',
-            ...     'Sensitive data here',
-            ...     type='secure',
-            ...     encryption_password='your_password'
-            ... )
+            >>> with WirePusher(token='abc12345') as client:
+            ...     response = client.send(
+            ...         'Secure Message',
+            ...         'Sensitive data here',
+            ...         type='secure',
+            ...         encryption_password='your_password'
+            ...     )
         """
-        # Handle encryption if password provided
-        final_message = message
-        iv_hex: Optional[str] = None
-
-        if encryption_password:
-            iv_bytes, iv_hex = generate_iv()
-            final_message = encrypt_message(message, encryption_password, iv_bytes)
-
-        request = NotificationRequest(
-            title=title,
-            message=final_message,
-            id=self.user_id,  # @deprecated Legacy authentication. Use token parameter instead.
-            token=self.token,
-            type=type,
-            tags=tags,
-            imageURL=image_url,
-            actionURL=action_url,
-            iv=iv_hex,
+        return self._run_async(
+            self._async_client.send(
+                title=title,
+                message=message,
+                type=type,
+                tags=tags,
+                image_url=image_url,
+                action_url=action_url,
+                encryption_password=encryption_password,
+            )
         )
 
+    def notifai(
+        self,
+        text: str,
+        *,
+        type: Optional[str] = None,
+    ) -> NotifAIResponse:
+        """Generate and send AI-powered notification from free-form text.
+
+        Uses Gemini AI to convert natural language into a structured notification
+        with auto-generated title, message, tags, and action URL.
+
+        Args:
+            text: Free-form text to convert into notification
+            type: Optional notification type (overrides AI-generated type)
+
+        Returns:
+            NotifAIResponse with status, message, and generated notification details
+
+        Raises:
+            AuthenticationError: Invalid token
+            ValidationError: Invalid parameters
+            RateLimitError: Rate limit exceeded (429)
+            ServerError: Server error (5xx)
+            NetworkError: Network communication failure
+            WirePusherError: Other API errors
+
+        Example:
+            >>> with WirePusher(token='abc12345') as client:
+            ...     response = client.notifai(
+            ...         'deployment finished successfully, v2.1.3 is live on prod'
+            ...     )
+            ...     print(response.status)  # 'success'
+            ...     print(response.notification)  # AI-generated structured notification
+        """
+        return self._run_async(
+            self._async_client.notifai(
+                text=text,
+                type=type,
+            )
+        )
+
+    def _run_async(self, coro):  # type: ignore
+        """Run an async coroutine synchronously.
+
+        This method handles running async code in sync context, properly managing
+        the event loop lifecycle.
+
+        Args:
+            coro: Coroutine to run
+
+        Returns:
+            Result from the coroutine
+        """
+        # Try to get the running event loop
         try:
-            response = self._client.post(
-                f"{self.base_url}/send",
-                json=request.to_dict(),
-                headers={"Content-Type": "application/json"},
-            )
-            response.raise_for_status()
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
 
-            data = response.json()
-            return NotificationResponse(
-                status=data.get("status", "unknown"),
-                message=data.get("message", ""),
-            )
+        if loop and loop.is_running():
+            # We're in an async context - create a new loop to avoid nesting
+            import concurrent.futures
 
-        except httpx.HTTPStatusError as e:
-            # Handle specific HTTP error codes
-            if e.response.status_code == 401:
-                raise AuthenticationError(
-                    "Invalid token or user ID. Please check your credentials."
-                ) from e
-            elif e.response.status_code == 400:
-                try:
-                    error_data = e.response.json()
-                    error_message = error_data.get("message", e.response.text)
-                except Exception:
-                    error_message = e.response.text
-                raise ValidationError(f"Invalid parameters: {error_message}") from e
-            elif e.response.status_code == 403:
-                raise AuthenticationError(
-                    "Forbidden: Your account may be disabled or you don't have permission."
-                ) from e
-            elif e.response.status_code == 404:
-                raise ValidationError("User not found. Please check your user ID.") from e
-            else:
-                try:
-                    error_data = e.response.json()
-                    error_message = error_data.get("message", e.response.text)
-                except Exception:
-                    error_message = e.response.text
-                raise WirePusherError(
-                    f"API error ({e.response.status_code}): {error_message}"
-                ) from e
-
-        except httpx.RequestError as e:
-            raise WirePusherError(f"Network error: {str(e)}") from e
-
-        except Exception as e:
-            raise WirePusherError(f"Unexpected error: {str(e)}") from e
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                future = pool.submit(asyncio.run, coro)
+                return future.result()
+        else:
+            # We're in a sync context - use asyncio.run()
+            return asyncio.run(coro)

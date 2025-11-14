@@ -31,7 +31,7 @@ from wirepusher import WirePusher
 
 ## Benefits
 
-<!-- How would this feature benefit WirePusher SDK users? -->
+<!-- How would this feature benefit WirePusher library users? -->
 
 - Benefit 1
 - Benefit 2
@@ -47,7 +47,7 @@ from wirepusher import WirePusher
 ## Checklist
 
 - [ ] I have searched existing issues to ensure this is not a duplicate
-- [ ] This feature aligns with the SDK's goals
+- [ ] This feature aligns with the library's goals
 - [ ] I have considered backwards compatibility
 - [ ] I am willing to contribute a PR for this feature (optional)
 

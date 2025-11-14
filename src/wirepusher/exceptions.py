@@ -1,13 +1,16 @@
-"""Custom exceptions for WirePusher SDK."""
+"""Custom exceptions for WirePusher library."""
 
 
 class WirePusherError(Exception):
-    """Base exception for WirePusher SDK.
+    """Base exception for WirePusher library.
 
-    All other exceptions in this SDK inherit from this class.
+    All other exceptions in this library inherit from this class.
+
+    Attributes:
+        is_retryable: Whether this error indicates a transient issue that may succeed on retry
     """
 
-    pass
+    is_retryable: bool = False
 
 
 class AuthenticationError(WirePusherError):
@@ -15,11 +18,13 @@ class AuthenticationError(WirePusherError):
 
     This typically occurs when:
     - The API token is invalid or expired
-    - The user ID is incorrect
-    - The token doesn't have permission for the user ID
+    - The token doesn't have permission
+    - The account is disabled
+
+    This error is NOT retryable as credentials won't change between attempts.
     """
 
-    pass
+    is_retryable = False
 
 
 class ValidationError(WirePusherError):
@@ -29,6 +34,42 @@ class ValidationError(WirePusherError):
     - Required parameters are missing
     - Parameters have invalid values
     - The request format is incorrect
+
+    This error is NOT retryable as the same invalid request will fail again.
     """
 
-    pass
+    is_retryable = False
+
+
+class RateLimitError(WirePusherError):
+    """Raised when rate limit is exceeded (HTTP 429).
+
+    This error IS retryable with exponential backoff.
+    The client will automatically retry with longer delays.
+    """
+
+    is_retryable = True
+
+
+class ServerError(WirePusherError):
+    """Raised when server returns 5xx error.
+
+    This typically indicates temporary server issues.
+    This error IS retryable with exponential backoff.
+    """
+
+    is_retryable = True
+
+
+class NetworkError(WirePusherError):
+    """Raised when network communication fails.
+
+    This typically occurs when:
+    - Network connection is unavailable
+    - DNS resolution fails
+    - Connection timeouts
+
+    This error IS retryable with exponential backoff.
+    """
+
+    is_retryable = True
