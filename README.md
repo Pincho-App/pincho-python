@@ -157,7 +157,7 @@ Send a notification.
 
 **Parameters:**
 - `title` (str, required): Notification title
-- `message` (str, required): Notification message
+- `message` (str, optional): Notification message
 - `type` (str, optional): Category for organization
 - `tags` (list[str], optional): Tags for filtering (automatically normalized)
 - `image_url` (str, optional): Image URL to display
@@ -206,6 +206,37 @@ except Exception as e:
 ```
 
 **Exceptions:** `AuthenticationError`, `ValidationError`, `RateLimitError`, `ServerError`, `NetworkError`
+
+## Validation Philosophy
+
+This library performs **minimal client-side validation** to ensure the API remains the source of truth:
+
+### ✅ We Validate
+
+- **Required parameters**: `title` and `token`
+- **Parameter types**: Ensuring correct Python types
+
+### ✅ We Normalize
+
+- **Tags**: Lowercase conversion, whitespace trimming, deduplication, and invalid character filtering
+- **Silent filtering**: Invalid tags are filtered out (not rejected)
+
+### ❌ We Don't Validate
+
+- **Message**: Optional parameter (not required by API)
+- **Tag limits**: API validates max 10 tags, 50 characters each
+- **Business rules**: Rules that may change server-side
+
+### Why This Approach?
+
+**The API is the source of truth.** Client-side validation of business rules can create false negatives when API rules evolve independently of client library updates. By performing minimal validation:
+
+- ✅ Valid requests are never rejected due to outdated client logic
+- ✅ API error messages provide detailed context (error codes, param names)
+- ✅ Less maintenance burden across client libraries
+- ✅ Consistent behavior as API evolves
+
+The API returns comprehensive error responses with `type`, `code`, `message`, and `param` fields to help you debug validation failures.
 
 ## Examples
 

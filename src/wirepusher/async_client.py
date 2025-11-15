@@ -47,7 +47,7 @@ class AsyncWirePusher:
         >>> asyncio.run(main())
     """
 
-    BASE_URL = "https://wirepusher.com"
+    BASE_URL = "https://api.wirepusher.dev"
     DEFAULT_TIMEOUT = 30.0
     DEFAULT_MAX_RETRIES = 3
     MAX_BACKOFF = 30.0  # Maximum retry delay in seconds

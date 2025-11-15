@@ -53,7 +53,7 @@ class TestWirePusher:
         """Test successful notification send."""
         httpx_mock.add_response(
             method="POST",
-            url="https://wirepusher.com/send",
+            url="https://api.wirepusher.dev/send",
             json={"status": "success", "message": "Notification sent successfully"},
             status_code=200,
         )
@@ -67,7 +67,7 @@ class TestWirePusher:
         """Test send with all optional parameters."""
         httpx_mock.add_response(
             method="POST",
-            url="https://wirepusher.com/send",
+            url="https://api.wirepusher.dev/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
         )
@@ -93,7 +93,7 @@ class TestWirePusher:
         """Test 401 authentication error."""
         httpx_mock.add_response(
             method="POST",
-            url="https://wirepusher.com/send",
+            url="https://api.wirepusher.dev/send",
             json={"status": "error", "message": "Invalid token"},
             status_code=401,
         )
@@ -107,7 +107,7 @@ class TestWirePusher:
         """Test 400 validation error."""
         httpx_mock.add_response(
             method="POST",
-            url="https://wirepusher.com/send",
+            url="https://api.wirepusher.dev/send",
             json={"status": "error", "message": "Title is required"},
             status_code=400,
         )
@@ -122,7 +122,7 @@ class TestWirePusher:
         """Test 403 forbidden error."""
         httpx_mock.add_response(
             method="POST",
-            url="https://wirepusher.com/send",
+            url="https://api.wirepusher.dev/send",
             json={"status": "error", "message": "Account disabled"},
             status_code=403,
         )
@@ -136,7 +136,7 @@ class TestWirePusher:
         """Test 404 not found error."""
         httpx_mock.add_response(
             method="POST",
-            url="https://wirepusher.com/send",
+            url="https://api.wirepusher.dev/send",
             json={"status": "error", "message": "User not found"},
             status_code=404,
         )
@@ -150,7 +150,7 @@ class TestWirePusher:
         """Test 500 server error."""
         httpx_mock.add_response(
             method="POST",
-            url="https://wirepusher.com/send",
+            url="https://api.wirepusher.dev/send",
             json={"status": "error", "message": "Internal server error"},
             status_code=500,
         )
@@ -182,7 +182,7 @@ class TestWirePusher:
         """Test handling of malformed JSON response."""
         httpx_mock.add_response(
             method="POST",
-            url="https://wirepusher.com/send",
+            url="https://api.wirepusher.dev/send",
             content=b"not json",
             status_code=200,
         )
@@ -196,7 +196,7 @@ class TestWirePusher:
         """Test handling of response with missing fields."""
         httpx_mock.add_response(
             method="POST",
-            url="https://wirepusher.com/send",
+            url="https://api.wirepusher.dev/send",
             json={},
             status_code=200,
         )
