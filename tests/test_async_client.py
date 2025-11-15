@@ -313,7 +313,9 @@ class TestAsyncWirePusher:
         )
 
         async with AsyncWirePusher(token="abc12345") as client:
-            response = await client.notifai("deployment finished successfully, v2.1.3 is live on prod")
+            response = await client.notifai(
+                "deployment finished successfully, v2.1.3 is live on prod"
+            )
             assert response.status == "success"
             assert response.notification is not None
             assert "title" in response.notification

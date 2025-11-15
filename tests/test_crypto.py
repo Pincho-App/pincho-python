@@ -2,8 +2,6 @@
 
 import os
 
-import pytest
-
 from wirepusher.crypto import (
     custom_base64_encode,
     derive_encryption_key,

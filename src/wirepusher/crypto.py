@@ -9,8 +9,8 @@ import hashlib
 import os
 from typing import Tuple
 
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
 def custom_base64_encode(data: bytes) -> str:

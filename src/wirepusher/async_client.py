@@ -272,7 +272,7 @@ class AsyncWirePusher:
 
                 # Don't retry non-retryable errors
                 if not error.is_retryable:
-                    raise error
+                    raise error from e
 
                 # Retry logic for retryable errors
                 if attempt < self.max_retries:
@@ -287,7 +287,7 @@ class AsyncWirePusher:
                     await asyncio.sleep(backoff)
                     attempt += 1
                 else:
-                    raise error
+                    raise error from e
 
             except httpx.RequestError as e:
                 last_exception = e
@@ -359,7 +359,7 @@ class AsyncWirePusher:
 
                 # Don't retry non-retryable errors
                 if not error.is_retryable:
-                    raise error
+                    raise error from e
 
                 # Retry logic for retryable errors
                 if attempt < self.max_retries:
@@ -374,7 +374,7 @@ class AsyncWirePusher:
                     await asyncio.sleep(backoff)
                     attempt += 1
                 else:
-                    raise error
+                    raise error from e
 
             except httpx.RequestError as e:
                 last_exception = e
@@ -438,7 +438,8 @@ class AsyncWirePusher:
 
         if status_code == 403:
             return AuthenticationError(
-                f"Forbidden: Your account may be disabled or you don't have permission. {error_message}"
+                f"Forbidden: Your account may be disabled or you don't have "
+                f"permission. {error_message}"
             )
 
         # Validation errors (400, 404)
