@@ -178,7 +178,6 @@ No config file support (not standard for Python libraries).
 - Error parsing now handles nested API error format
 - Parse `error.message`, `error.code`, `error.type`, `error.param` from API responses
 - Build descriptive error messages with code and param context
-- Backward compatible with old flat error format (fallback)
 
 ### v2.0.0
 
@@ -293,7 +292,7 @@ Token via `token` parameter only (no config file).
 }
 ```
 
-**Error response (nested format):**
+**Error response:**
 ```json
 {
   "status": "error",
@@ -306,7 +305,7 @@ Token via `token` parameter only (no config file).
 }
 ```
 
-The library parses the nested error object and builds descriptive error messages:
+The library expects and parses only the nested error format. It extracts error details and builds descriptive error messages:
 - `error.message` - Human-readable error message
 - `error.code` - Machine-readable error code (appended in brackets)
 - `error.type` - Error category (authentication_error, validation_error, etc.)
