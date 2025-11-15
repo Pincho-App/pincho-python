@@ -92,6 +92,7 @@ class TestWirePusher:
 
         # Verify token is NOT in request body
         import json
+
         body = json.loads(request.content.decode())
         assert "token" not in body
 
@@ -106,7 +107,7 @@ class TestWirePusher:
                     "type": "authentication_error",
                     "code": "invalid_token",
                     "message": "Invalid token",
-                }
+                },
             },
             status_code=401,
         )
@@ -128,8 +129,8 @@ class TestWirePusher:
                     "type": "validation_error",
                     "code": "missing_required_field",
                     "message": "Title is required",
-                    "param": "title"
-                }
+                    "param": "title",
+                },
             },
             status_code=400,
         )
@@ -153,7 +154,7 @@ class TestWirePusher:
                     "type": "authentication_error",
                     "code": "account_disabled",
                     "message": "Account disabled",
-                }
+                },
             },
             status_code=403,
         )
@@ -175,7 +176,7 @@ class TestWirePusher:
                     "type": "validation_error",
                     "code": "not_found",
                     "message": "User not found",
-                }
+                },
             },
             status_code=404,
         )
@@ -199,7 +200,7 @@ class TestWirePusher:
                         "type": "server_error",
                         "code": "internal_error",
                         "message": "Internal server error",
-                    }
+                    },
                 },
                 status_code=500,
             )

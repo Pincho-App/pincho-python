@@ -312,9 +312,7 @@ class AsyncWirePusher:
                 raise WirePusherError(f"Unexpected error: {str(e)}") from e
 
         # Should never reach here, but just in case
-        raise WirePusherError(
-            f"Failed after {self.max_retries + 1} attempts"
-        ) from last_exception
+        raise WirePusherError(f"Failed after {self.max_retries + 1} attempts") from last_exception
 
     async def _notifai_with_retry(self, request: NotifAIRequest) -> NotifAIResponse:
         """Send NotifAI request with automatic retry logic.
@@ -399,9 +397,7 @@ class AsyncWirePusher:
                 raise WirePusherError(f"Unexpected error: {str(e)}") from e
 
         # Should never reach here, but just in case
-        raise WirePusherError(
-            f"Failed after {self.max_retries + 1} attempts"
-        ) from last_exception
+        raise WirePusherError(f"Failed after {self.max_retries + 1} attempts") from last_exception
 
     def _handle_http_error(self, error: httpx.HTTPStatusError) -> WirePusherError:
         """Convert HTTP status errors to appropriate WirePusher exceptions.
@@ -477,5 +473,5 @@ class AsyncWirePusher:
             # Normal errors: standard backoff (1s, 2s, 4s, 8s, ...)
             base_delay = 1.0
 
-        delay = base_delay * (2 ** attempt)
+        delay = base_delay * (2**attempt)
         return min(delay, self.MAX_BACKOFF)

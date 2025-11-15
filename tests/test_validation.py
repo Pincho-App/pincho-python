@@ -1,6 +1,5 @@
 """Tests for input validation utilities."""
 
-
 from wirepusher.validation import normalize_tags
 
 

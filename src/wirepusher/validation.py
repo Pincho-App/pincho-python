@@ -43,7 +43,7 @@ def normalize_tags(tags: Optional[List[str]]) -> Optional[List[str]]:
             continue
 
         # Validate characters (alphanumeric, hyphens, underscores only)
-        if not re.match(r'^[a-z0-9_-]+$', normalized_tag):
+        if not re.match(r"^[a-z0-9_-]+$", normalized_tag):
             continue
 
         normalized.append(normalized_tag)

@@ -53,6 +53,7 @@ class TestCustomBase64Encode:
         # Reverse the custom encoding to get standard Base64
         standard = encoded.replace("-", "+").replace(".", "/").replace("_", "=")
         import base64
+
         decoded = base64.b64decode(standard)
 
         assert decoded == original
@@ -245,6 +246,7 @@ class TestEncryptMessage:
             # (before custom Base64 encoding)
             standard_b64 = result.replace("-", "+").replace(".", "/").replace("_", "=")
             import base64
+
             encrypted_bytes = base64.b64decode(standard_b64)
             assert len(encrypted_bytes) % 16 == 0
 
