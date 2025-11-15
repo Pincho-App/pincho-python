@@ -348,5 +348,5 @@ Example: `Invalid parameters: Title is required [missing_required_field] (parame
 
 - **Repository**: https://gitlab.com/wirepusher/wirepusher-python
 - **Issues**: https://gitlab.com/wirepusher/wirepusher-python/-/issues
-- **API Docs**: https://wirepusher.com/docs
+- **API Docs**: https://wirepusher.dev/help
 - **App**: https://wirepusher.dev

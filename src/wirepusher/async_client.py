@@ -180,7 +180,6 @@ class AsyncWirePusher:
         request = NotificationRequest(
             title=title,
             message=final_message,
-            token=self.token,
             type=type,
             tags=normalized_tags,
             imageURL=image_url,
@@ -226,7 +225,6 @@ class AsyncWirePusher:
         """
         request = NotifAIRequest(
             text=text,
-            token=self.token,
             type=type,
         )
 
@@ -254,7 +252,10 @@ class AsyncWirePusher:
                 response = await self._client.post(
                     f"{self.base_url}/send",
                     json=request.to_dict(),
-                    headers={"Content-Type": "application/json"},
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {self.token}",
+                    },
                 )
                 response.raise_for_status()
 
@@ -337,7 +338,10 @@ class AsyncWirePusher:
                 response = await self._client.post(
                     f"{self.base_url}/notifai",
                     json=request.to_dict(),
-                    headers={"Content-Type": "application/json"},
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {self.token}",
+                    },
                 )
                 response.raise_for_status()
 

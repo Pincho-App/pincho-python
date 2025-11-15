@@ -18,20 +18,20 @@ class TestWirePusher:
     def test_init(self) -> None:
         """Test client initialization with token."""
         client = WirePusher(token="abc12345")
-        assert client.token == "abc12345"
-        assert client.timeout == 30.0
-        assert client.base_url == WirePusher.BASE_URL
+        assert client._async_client.token == "abc12345"
+        assert client._async_client.timeout == 30.0
+        assert client._async_client.base_url == "https://api.wirepusher.dev"
         client.close()
 
     def test_init_missing_token_raises_error(self) -> None:
         """Test that missing token raises ValueError."""
         with pytest.raises(ValueError, match="Token is required"):
-            WirePusher()
+            WirePusher(token="")
 
     def test_init_custom_timeout(self) -> None:
         """Test client initialization with custom timeout."""
         client = WirePusher(token="abc12345", timeout=60.0)
-        assert client.timeout == 60.0
+        assert client._async_client.timeout == 60.0
         client.close()
 
     def test_init_custom_base_url(self) -> None:
@@ -40,13 +40,13 @@ class TestWirePusher:
             token="abc12345",
             base_url="https://custom.example.com",
         )
-        assert client.base_url == "https://custom.example.com"
+        assert client._async_client.base_url == "https://custom.example.com"
         client.close()
 
     def test_context_manager(self) -> None:
         """Test client as context manager."""
         with WirePusher(token="abc12345") as client:
-            assert client.token == "abc12345"
+            assert client._async_client.token == "abc12345"
         # Client should be closed after exiting context
 
     def test_send_success(self, httpx_mock: HTTPXMock) -> None:
@@ -83,11 +83,17 @@ class TestWirePusher:
             )
             assert response.status == "success"
 
-        # Verify request payload
+        # Verify request payload and headers
         request = httpx_mock.get_request()
         assert request is not None
         assert request.method == "POST"
         assert request.headers["Content-Type"] == "application/json"
+        assert request.headers["Authorization"] == "Bearer abc12345"
+
+        # Verify token is NOT in request body
+        import json
+        body = json.loads(request.content.decode())
+        assert "token" not in body
 
     def test_send_authentication_error_401(self, httpx_mock: HTTPXMock) -> None:
         """Test 401 authentication error with nested error format."""
@@ -182,19 +188,21 @@ class TestWirePusher:
 
     def test_send_server_error_500(self, httpx_mock: HTTPXMock) -> None:
         """Test 500 server error with nested error format."""
-        httpx_mock.add_response(
-            method="POST",
-            url="https://api.wirepusher.dev/send",
-            json={
-                "status": "error",
-                "error": {
-                    "type": "server_error",
-                    "code": "internal_error",
-                    "message": "Internal server error",
-                }
-            },
-            status_code=500,
-        )
+        # Server error is retryable, so mock will be called 4 times (initial + 3 retries)
+        for _ in range(4):
+            httpx_mock.add_response(
+                method="POST",
+                url="https://api.wirepusher.dev/send",
+                json={
+                    "status": "error",
+                    "error": {
+                        "type": "server_error",
+                        "code": "internal_error",
+                        "message": "Internal server error",
+                    }
+                },
+                status_code=500,
+            )
 
         with WirePusher(token="abc12345") as client:
             with pytest.raises(WirePusherError) as exc_info:
@@ -204,7 +212,9 @@ class TestWirePusher:
 
     def test_send_network_error(self, httpx_mock: HTTPXMock) -> None:
         """Test network error handling."""
-        httpx_mock.add_exception(httpx.ConnectError("Connection failed"))
+        # Network error is retryable, so mock will be called 4 times (initial + 3 retries)
+        for _ in range(4):
+            httpx_mock.add_exception(httpx.ConnectError("Connection failed"))
 
         with WirePusher(token="abc12345") as client:
             with pytest.raises(WirePusherError) as exc_info:
@@ -213,7 +223,9 @@ class TestWirePusher:
 
     def test_send_timeout_error(self, httpx_mock: HTTPXMock) -> None:
         """Test timeout error handling."""
-        httpx_mock.add_exception(httpx.TimeoutException("Request timed out"))
+        # Timeout is retryable, so mock will be called 4 times (initial + 3 retries)
+        for _ in range(4):
+            httpx_mock.add_exception(httpx.TimeoutException("Request timed out"))
 
         with WirePusher(token="abc12345", timeout=1.0) as client:
             with pytest.raises(WirePusherError) as exc_info:

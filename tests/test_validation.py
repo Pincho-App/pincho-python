@@ -54,8 +54,8 @@ class TestNormalizeTags:
         ]
 
         # Invalid: special characters
-        assert normalize_tags(["prod@", "test!", "deploy#"]) == []
-        assert normalize_tags(["prod.env", "test(1)", "deploy[2]"]) == []
+        assert normalize_tags(["prod@", "test!", "deploy#"]) is None
+        assert normalize_tags(["prod.env", "test(1)", "deploy[2]"]) is None
 
     def test_mixed_valid_invalid(self):
         """Test filtering when mixing valid and invalid tags."""

@@ -8,10 +8,11 @@ from typing import Any, Dict, List, Optional
 class NotificationRequest:
     """Notification request model for v1 API.
 
+    Note: Token is sent via Authorization header, not in request body.
+
     Args:
         title: Notification title
         message: Notification message body
-        token: WirePusher API token (required)
         type: Optional notification type for filtering/organization
         tags: Optional list of tags
         imageURL: Optional image URL to display
@@ -21,7 +22,6 @@ class NotificationRequest:
 
     title: str
     message: str
-    token: str
     type: Optional[str] = None
     tags: Optional[List[str]] = None
     imageURL: Optional[str] = None
@@ -55,14 +55,14 @@ class NotificationResponse:
 class NotifAIRequest:
     """NotifAI request model for AI-powered notifications.
 
+    Note: Token is sent via Authorization header, not in request body.
+
     Args:
         text: Free-form text to convert into structured notification
-        token: WirePusher API token for authentication
         type: Optional notification type to override AI-generated type
     """
 
     text: str
-    token: str
     type: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
