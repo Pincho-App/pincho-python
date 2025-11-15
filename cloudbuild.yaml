@@ -109,6 +109,7 @@ availableSecrets:
 
 timeout: '600s'
 options:
+  machineType: 'E2_HIGHCPU_8'
   logging: CLOUD_LOGGING_ONLY
 
 # Artifacts to save (optional)
