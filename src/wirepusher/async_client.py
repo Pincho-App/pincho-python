@@ -410,20 +410,37 @@ class AsyncWirePusher:
         """
         status_code = error.response.status_code
 
-        # Extract error message from response
+        # Extract error message from response (handle nested error format)
         try:
             error_data = error.response.json()
-            error_message = error_data.get("message", error.response.text)
+            # Parse nested error object
+            error_obj = error_data.get("error", {})
+            error_message = error_obj.get("message", "Unknown error")
+            error_code = error_obj.get("code")
+            error_type = error_obj.get("type")
+            error_param = error_obj.get("param")
+
+            # Build descriptive message
+            if error_code:
+                error_message = f"{error_message} [{error_code}]"
+            if error_param:
+                error_message = f"{error_message} (parameter: {error_param})"
+
+            # Fallback to old flat format if nested format not present
+            if not error_obj:
+                error_message = error_data.get("message", error.response.text)
         except Exception:
             error_message = error.response.text
 
         # Authentication errors (401, 403)
         if status_code == 401:
-            return AuthenticationError("Invalid token. Please check your credentials.")
+            return AuthenticationError(
+                f"Invalid token. Please check your credentials. {error_message}"
+            )
 
         if status_code == 403:
             return AuthenticationError(
-                "Forbidden: Your account may be disabled or you don't have permission."
+                f"Forbidden: Your account may be disabled or you don't have permission. {error_message}"
             )
 
         # Validation errors (400, 404)
@@ -431,7 +448,7 @@ class AsyncWirePusher:
             return ValidationError(f"Invalid parameters: {error_message}")
 
         if status_code == 404:
-            return ValidationError("Resource not found.")
+            return ValidationError(f"Resource not found. {error_message}")
 
         # Rate limit (429)
         if status_code == 429:

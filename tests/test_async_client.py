@@ -91,11 +91,18 @@ class TestAsyncWirePusher:
 
     @pytest.mark.asyncio
     async def test_send_authentication_error_401(self, httpx_mock: HTTPXMock) -> None:
-        """Test 401 authentication error."""
+        """Test 401 authentication error with nested error format."""
         httpx_mock.add_response(
             method="POST",
             url="https://api.wirepusher.dev/send",
-            json={"status": "error", "message": "Invalid token"},
+            json={
+                "status": "error",
+                "error": {
+                    "type": "authentication_error",
+                    "code": "invalid_token",
+                    "message": "Invalid token",
+                }
+            },
             status_code=401,
         )
 
@@ -103,14 +110,23 @@ class TestAsyncWirePusher:
             with pytest.raises(AuthenticationError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "Invalid token" in str(exc_info.value)
+            assert "[invalid_token]" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_send_validation_error_400(self, httpx_mock: HTTPXMock) -> None:
-        """Test 400 validation error."""
+        """Test 400 validation error with nested error format."""
         httpx_mock.add_response(
             method="POST",
             url="https://api.wirepusher.dev/send",
-            json={"status": "error", "message": "Title is required"},
+            json={
+                "status": "error",
+                "error": {
+                    "type": "validation_error",
+                    "code": "missing_required_field",
+                    "message": "Title is required",
+                    "param": "title"
+                }
+            },
             status_code=400,
         )
 
@@ -119,14 +135,23 @@ class TestAsyncWirePusher:
                 await client.send("", "Test message")
             assert "Invalid parameters" in str(exc_info.value)
             assert "Title is required" in str(exc_info.value)
+            assert "(parameter: title)" in str(exc_info.value)
+            assert "[missing_required_field]" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_send_forbidden_error_403(self, httpx_mock: HTTPXMock) -> None:
-        """Test 403 forbidden error."""
+        """Test 403 forbidden error with nested error format."""
         httpx_mock.add_response(
             method="POST",
             url="https://api.wirepusher.dev/send",
-            json={"status": "error", "message": "Account disabled"},
+            json={
+                "status": "error",
+                "error": {
+                    "type": "authentication_error",
+                    "code": "account_disabled",
+                    "message": "Account disabled",
+                }
+            },
             status_code=403,
         )
 
@@ -134,14 +159,22 @@ class TestAsyncWirePusher:
             with pytest.raises(AuthenticationError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "Forbidden" in str(exc_info.value)
+            assert "[account_disabled]" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_send_not_found_error_404(self, httpx_mock: HTTPXMock) -> None:
-        """Test 404 not found error."""
+        """Test 404 not found error with nested error format."""
         httpx_mock.add_response(
             method="POST",
             url="https://api.wirepusher.dev/send",
-            json={"status": "error", "message": "User not found"},
+            json={
+                "status": "error",
+                "error": {
+                    "type": "validation_error",
+                    "code": "not_found",
+                    "message": "User not found",
+                }
+            },
             status_code=404,
         )
 
@@ -149,21 +182,30 @@ class TestAsyncWirePusher:
             with pytest.raises(ValidationError) as exc_info:
                 await client.send("Test Title", "Test message")
             assert "User not found" in str(exc_info.value)
+            assert "[not_found]" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_send_server_error_500(self, httpx_mock: HTTPXMock) -> None:
-        """Test 500 server error."""
+        """Test 500 server error with nested error format."""
         httpx_mock.add_response(
             method="POST",
             url="https://api.wirepusher.dev/send",
-            json={"status": "error", "message": "Internal server error"},
+            json={
+                "status": "error",
+                "error": {
+                    "type": "server_error",
+                    "code": "internal_error",
+                    "message": "Internal server error",
+                }
+            },
             status_code=500,
         )
 
         async with AsyncWirePusher(token="abc12345") as client:
             with pytest.raises(WirePusherError) as exc_info:
                 await client.send("Test Title", "Test message")
-            assert "API error (500)" in str(exc_info.value)
+            assert "Server error (500)" in str(exc_info.value)
+            assert "[internal_error]" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_send_network_error(self, httpx_mock: HTTPXMock) -> None:

@@ -170,7 +170,17 @@ No config file support (not standard for Python libraries).
 - `black >= 23.0.0` - Code formatting
 - `ruff >= 0.1.0` - Linting
 
-## Recent Changes (v2.0.0)
+## Recent Changes
+
+### v2.0.1 (Current)
+
+**Fixed**:
+- Error parsing now handles nested API error format
+- Parse `error.message`, `error.code`, `error.type`, `error.param` from API responses
+- Build descriptive error messages with code and param context
+- Backward compatible with old flat error format (fallback)
+
+### v2.0.0
 
 **Added**:
 - NotifAI endpoint for AI-powered notifications
@@ -275,7 +285,7 @@ Token via `token` parameter only (no config file).
 
 ### Response Format
 
-Structured JSON:
+**Success response:**
 ```json
 {
   "status": "success",
@@ -283,7 +293,26 @@ Structured JSON:
 }
 ```
 
-Error responses include detailed error information.
+**Error response (nested format):**
+```json
+{
+  "status": "error",
+  "error": {
+    "type": "validation_error",
+    "code": "missing_required_field",
+    "message": "Title is required",
+    "param": "title"
+  }
+}
+```
+
+The library parses the nested error object and builds descriptive error messages:
+- `error.message` - Human-readable error message
+- `error.code` - Machine-readable error code (appended in brackets)
+- `error.type` - Error category (authentication_error, validation_error, etc.)
+- `error.param` - Parameter that caused the error (appended in parentheses)
+
+Example: `Invalid parameters: Title is required [missing_required_field] (parameter: title)`
 
 ## Notes for AI Assistants
 
