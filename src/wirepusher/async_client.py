@@ -410,14 +410,12 @@ class AsyncWirePusher:
         """
         status_code = error.response.status_code
 
-        # Extract error message from response (handle nested error format)
+        # Extract error message from response (nested error format only)
         try:
             error_data = error.response.json()
-            # Parse nested error object
             error_obj = error_data.get("error", {})
             error_message = error_obj.get("message", "Unknown error")
             error_code = error_obj.get("code")
-            error_type = error_obj.get("type")
             error_param = error_obj.get("param")
 
             # Build descriptive message
@@ -425,10 +423,6 @@ class AsyncWirePusher:
                 error_message = f"{error_message} [{error_code}]"
             if error_param:
                 error_message = f"{error_message} (parameter: {error_param})"
-
-            # Fallback to old flat format if nested format not present
-            if not error_obj:
-                error_message = error_data.get("message", error.response.text)
         except Exception:
             error_message = error.response.text
 
