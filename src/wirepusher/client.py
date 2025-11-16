@@ -2,10 +2,12 @@
 
 import asyncio
 import logging
-from typing import List, Optional
+from typing import Any, Coroutine, List, Optional, TypeVar
 
 from wirepusher.async_client import AsyncWirePusher
 from wirepusher.models import NotifAIResponse, NotificationResponse
+
+T = TypeVar("T")
 
 logger = logging.getLogger("wirepusher")
 
@@ -189,7 +191,7 @@ class WirePusher:
             )
         )
 
-    def _run_async(self, coro):  # type: ignore
+    def _run_async(self, coro: Coroutine[Any, Any, T]) -> T:
         """Run an async coroutine synchronously.
 
         This method handles running async code in sync context, properly managing
@@ -213,7 +215,9 @@ class WirePusher:
 
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 future = pool.submit(asyncio.run, coro)
-                return future.result()
+                result: T = future.result()
+                return result
         else:
             # We're in a sync context - use asyncio.run()
-            return asyncio.run(coro)
+            result_value: T = asyncio.run(coro)
+            return result_value

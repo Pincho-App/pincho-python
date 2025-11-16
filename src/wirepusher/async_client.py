@@ -474,4 +474,4 @@ class AsyncWirePusher:
             base_delay = 1.0
 
         delay = base_delay * (2**attempt)
-        return min(delay, self.MAX_BACKOFF)
+        return float(min(delay, self.MAX_BACKOFF))

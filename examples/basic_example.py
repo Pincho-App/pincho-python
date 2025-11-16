@@ -1,6 +1,7 @@
 """Basic example of using WirePusher library."""
 
 import os
+
 from wirepusher import WirePusher
 
 # Get token from environment variable

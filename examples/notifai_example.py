@@ -11,6 +11,7 @@ The AI automatically generates:
 """
 
 import os
+
 from wirepusher import WirePusher
 from wirepusher.exceptions import WirePusherError
 
@@ -24,14 +25,12 @@ def main():
     # Example 1: Basic NotifAI usage
     print("Example 1: Basic AI-generated notification...")
     with WirePusher(token=TOKEN) as client:
-        response = client.notifai(
-            'deployment finished successfully, v2.1.3 is live on production'
-        )
+        response = client.notifai("deployment finished successfully, v2.1.3 is live on production")
 
         print(f"  Status: {response.status}")
         print(f"  Message: {response.message}")
         if response.notification:
-            print(f"  AI Generated:")
+            print("  AI Generated:")
             print(f"    Title: {response.notification.get('title')}")
             print(f"    Message: {response.notification.get('message')}")
             print(f"    Type: {response.notification.get('type')}")
@@ -41,11 +40,11 @@ def main():
     print("Example 2: System monitoring alert...")
     with WirePusher(token=TOKEN) as client:
         response = client.notifai(
-            'cpu at 95% on web-3, memory usage is high, might need to restart'
+            "cpu at 95% on web-3, memory usage is high, might need to restart"
         )
 
         if response.notification:
-            print(f"  AI Generated:")
+            print("  AI Generated:")
             print(f"    Title: {response.notification.get('title')}")
             print(f"    Message: {response.notification.get('message')}")
             print(f"    Tags: {response.notification.get('tags')}\n")
@@ -54,12 +53,11 @@ def main():
     print("Example 3: Override AI type...")
     with WirePusher(token=TOKEN) as client:
         response = client.notifai(
-            'new user signup, email: user@example.com',
-            type='user-activity'  # Override AI type
+            "new user signup, email: user@example.com", type="user-activity"  # Override AI type
         )
 
         if response.notification:
-            print(f"  AI Generated (with type override):")
+            print("  AI Generated (with type override):")
             print(f"    Title: {response.notification.get('title')}")
             print(f"    Message: {response.notification.get('message')}")
             print(f"    Type: {response.notification.get('type')}")
@@ -68,12 +66,10 @@ def main():
     # Example 4: Sales/business event
     print("Example 4: Business event...")
     with WirePusher(token=TOKEN) as client:
-        response = client.notifai(
-            'new order placed, $249.99, premium plan subscription'
-        )
+        response = client.notifai("new order placed, $249.99, premium plan subscription")
 
         if response.notification:
-            print(f"  AI Generated:")
+            print("  AI Generated:")
             print(f"    Title: {response.notification.get('title')}")
             print(f"    Message: {response.notification.get('message')}")
             print(f"    Tags: {response.notification.get('tags')}\n")
@@ -83,7 +79,7 @@ def main():
     try:
         with WirePusher(token=TOKEN) as client:
             # Empty text should fail validation
-            response = client.notifai('')
+            response = client.notifai("")
     except WirePusherError as e:
         print(f"  Expected error: {e}\n")
 
@@ -95,5 +91,5 @@ def main():
     print("  - Works with both sync and async clients")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

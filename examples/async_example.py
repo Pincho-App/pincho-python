@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+
 from wirepusher import AsyncWirePusher
 
 # Get token from environment variable
@@ -24,8 +25,7 @@ async def send_multiple_concurrent():
     async with AsyncWirePusher(token=TOKEN) as client:
         # Create multiple notification tasks
         tasks = [
-            client.send(f"Notification {i}", f"This is message number {i}")
-            for i in range(1, 4)
+            client.send(f"Notification {i}", f"This is message number {i}") for i in range(1, 4)
         ]
 
         # Execute all tasks concurrently
