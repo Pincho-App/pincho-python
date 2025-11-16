@@ -115,7 +115,7 @@ options:
 # Artifacts to save (optional)
 artifacts:
   objects:
-    location: 'gs://wirepusher-build-artifacts/python-sdk/$BUILD_ID'
+    location: 'gs://${PROJECT_ID}_cloudbuild/artifacts/python-sdk/${BUILD_ID}'
     paths:
       - 'dist/*'
       - 'coverage.xml'
