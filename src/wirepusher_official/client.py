@@ -5,7 +5,7 @@ import logging
 from typing import Any, Coroutine, List, Optional, TypeVar
 
 from wirepusher_official.async_client import AsyncWirePusher
-from wirepusher_official.models import NotifAIResponse, NotificationResponse
+from wirepusher_official.models import NotifAIResponse, NotificationResponse, RateLimitInfo
 
 T = TypeVar("T")
 
@@ -72,6 +72,15 @@ class WirePusher:
             base_url=base_url,
         )
         self._loop: Optional[asyncio.AbstractEventLoop] = None
+
+    @property
+    def last_rate_limit(self) -> Optional[RateLimitInfo]:
+        """Get the last rate limit information from API responses.
+
+        Returns:
+            RateLimitInfo if available from last request, None otherwise
+        """
+        return self._async_client.last_rate_limit
 
     def __enter__(self) -> "WirePusher":
         """Context manager entry."""

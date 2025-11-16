@@ -3,7 +3,7 @@
 Official Python client library for WirePusher push notifications API.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.0-alpha.6"
 
 from wirepusher_official.async_client import AsyncWirePusher
 from wirepusher_official.client import WirePusher
@@ -15,7 +15,7 @@ from wirepusher_official.exceptions import (
     ValidationError,
     WirePusherError,
 )
-from wirepusher_official.models import NotifAIResponse, NotificationResponse
+from wirepusher_official.models import NotifAIResponse, NotificationResponse, RateLimitInfo
 
 __all__ = [
     "WirePusher",
@@ -28,4 +28,5 @@ __all__ = [
     "NetworkError",
     "NotificationResponse",
     "NotifAIResponse",
+    "RateLimitInfo",
 ]
