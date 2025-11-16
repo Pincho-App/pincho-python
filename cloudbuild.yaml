@@ -116,20 +116,16 @@ steps:
           exit 0
         fi
 
-        echo "=== Sending release notification ==="
-        curl -s -X POST https://api.wirepusher.dev/send \
+        echo "=== Sending release notification via NotifAI ==="
+        curl -s -X POST https://api.wirepusher.dev/notifai \
           -H "Authorization: Bearer $$WIREPUSHER_TOKEN" \
           -H "Content-Type: application/json" \
           -d "{
-            \"title\": \"Python SDK Release $TAG_NAME\",
-            \"message\": \"WirePusher Python SDK $TAG_NAME published to PyPI. Install via: pip install wirepusher-official\",
-            \"type\": \"release\",
-            \"tags\": [\"python\", \"sdk\", \"release\", \"pypi\"],
-            \"actionURL\": \"https://pypi.org/project/wirepusher-official/\"
+            \"text\": \"WirePusher Python SDK $TAG_NAME published to PyPI successfully. Install via pip install wirepusher-official. View package at https://pypi.org/project/wirepusher-official/\"
           }"
 
         echo ""
-        echo "✓ Release notification sent"
+        echo "✓ Release notification sent via NotifAI"
 
 # Secret Manager integration
 availableSecrets:
