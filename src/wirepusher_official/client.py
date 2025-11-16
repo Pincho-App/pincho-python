@@ -82,8 +82,18 @@ class WirePusher:
         self.close()
 
     def close(self) -> None:
-        """Close the HTTP client and release resources."""
-        self._run_async(self._async_client.close())
+        """Close the HTTP client and release resources.
+
+        Note: In the sync wrapper, closing is best-effort since each request
+        uses a new event loop via asyncio.run(). The connections may already
+        be cleaned up.
+        """
+        try:
+            self._run_async(self._async_client.close())
+        except RuntimeError:
+            # Event loop closed error is expected when using asyncio.run()
+            # The connections are cleaned up when the loop closes
+            pass
 
     def send(
         self,

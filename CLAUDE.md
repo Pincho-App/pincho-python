@@ -138,20 +138,28 @@ Implementation: `crypto.py`
 
 ## Configuration Priority
 
-Simple constructor-based configuration:
+Environment variable support with constructor-based overrides:
 
 ```python
-# Required
+# Auto-load from environment variables
+client = WirePusher()  # reads WIREPUSHER_TOKEN
+
+# Explicit token
 client = WirePusher(token='abc12345')
 
-# Optional parameters
+# All options
 client = WirePusher(
-    token='abc12345',
-    timeout=60.0,        # Request timeout (default: 30.0)
-    max_retries=5,       # Retry attempts (default: 3)
-    base_url='...'       # Custom base URL (for testing)
+    token='abc12345',     # Or WIREPUSHER_TOKEN env var
+    timeout=60.0,         # Or WIREPUSHER_TIMEOUT env var (seconds), default: 30.0
+    max_retries=5,        # Or WIREPUSHER_MAX_RETRIES env var, default: 3
+    base_url='...'        # Custom base URL (for testing)
 )
 ```
+
+**Environment Variables**:
+- `WIREPUSHER_TOKEN` - API token (required if not passed to constructor)
+- `WIREPUSHER_TIMEOUT` - Request timeout in seconds (default: 30)
+- `WIREPUSHER_MAX_RETRIES` - Maximum retry attempts (default: 3)
 
 No config file support (not standard for Python libraries).
 
@@ -172,7 +180,7 @@ No config file support (not standard for Python libraries).
 
 ## Recent Changes
 
-### v2.0.1 (Current)
+### v1.0.0 (Current - Alpha)
 
 **Fixed**:
 - Error parsing now handles nested API error format

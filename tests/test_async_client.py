@@ -22,10 +22,46 @@ class TestAsyncWirePusher:
         assert client.timeout == 30.0
         assert client.base_url == AsyncWirePusher.BASE_URL
 
-    def test_init_missing_token_raises_error(self) -> None:
+    def test_init_missing_token_raises_error(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that missing token raises ValueError."""
+        # Ensure no env var is set
+        monkeypatch.delenv("WIREPUSHER_TOKEN", raising=False)
+        with pytest.raises(ValueError, match="Token is required"):
+            AsyncWirePusher()
+
+    def test_init_empty_token_raises_error(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that empty token raises ValueError."""
+        monkeypatch.delenv("WIREPUSHER_TOKEN", raising=False)
         with pytest.raises(ValueError, match="Token is required"):
             AsyncWirePusher(token="")
+
+    def test_init_from_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test client initialization from WIREPUSHER_TOKEN env var."""
+        monkeypatch.setenv("WIREPUSHER_TOKEN", "env_token_123")
+        client = AsyncWirePusher()
+        assert client.token == "env_token_123"
+
+    def test_init_timeout_from_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test timeout initialization from WIREPUSHER_TIMEOUT env var."""
+        monkeypatch.setenv("WIREPUSHER_TIMEOUT", "60.0")
+        client = AsyncWirePusher(token="abc12345")
+        assert client.timeout == 60.0
+
+    def test_init_max_retries_from_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test max_retries initialization from WIREPUSHER_MAX_RETRIES env var."""
+        monkeypatch.setenv("WIREPUSHER_MAX_RETRIES", "5")
+        client = AsyncWirePusher(token="abc12345")
+        assert client.max_retries == 5
+
+    def test_init_explicit_overrides_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that explicit parameters override environment variables."""
+        monkeypatch.setenv("WIREPUSHER_TOKEN", "env_token")
+        monkeypatch.setenv("WIREPUSHER_TIMEOUT", "60.0")
+        monkeypatch.setenv("WIREPUSHER_MAX_RETRIES", "5")
+        client = AsyncWirePusher(token="explicit_token", timeout=10.0, max_retries=1)
+        assert client.token == "explicit_token"
+        assert client.timeout == 10.0
+        assert client.max_retries == 1
 
     def test_init_custom_timeout(self) -> None:
         """Test client initialization with custom timeout."""

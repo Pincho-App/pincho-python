@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 from typing import List, Optional
 
 import httpx
@@ -54,24 +55,29 @@ class AsyncWirePusher:
 
     def __init__(
         self,
-        token: str,
-        timeout: float = DEFAULT_TIMEOUT,
-        max_retries: int = DEFAULT_MAX_RETRIES,
+        token: Optional[str] = None,
+        timeout: Optional[float] = None,
+        max_retries: Optional[int] = None,
         base_url: Optional[str] = None,
     ):
         """Initialize async WirePusher client.
 
         Args:
-            token: WirePusher API token (required)
-            timeout: Request timeout in seconds (default: 30.0)
-            max_retries: Maximum number of retry attempts (default: 3, set to 0 to disable)
+            token: WirePusher API token. If not provided, reads from WIREPUSHER_TOKEN env var.
+            timeout: Request timeout in seconds. If not provided, reads from WIREPUSHER_TIMEOUT
+                    env var or defaults to 30.0.
+            max_retries: Maximum number of retry attempts. If not provided, reads from
+                        WIREPUSHER_MAX_RETRIES env var or defaults to 3. Set to 0 to disable.
             base_url: Optional custom base URL (mainly for testing)
 
         Raises:
-            ValueError: If token is not provided
+            ValueError: If token is not provided and WIREPUSHER_TOKEN env var is not set
 
         Examples:
-            >>> # Basic usage
+            >>> # Auto-load from environment variables
+            >>> client = AsyncWirePusher()  # reads WIREPUSHER_TOKEN
+
+            >>> # Explicit token
             >>> client = AsyncWirePusher(token='abc12345')
 
             >>> # With custom settings
@@ -81,20 +87,39 @@ class AsyncWirePusher:
             ...     max_retries=5
             ... )
         """
-        if not token:
-            raise ValueError("Token is required")
+        # Load from environment variables with fallbacks
+        resolved_token = token or os.environ.get("WIREPUSHER_TOKEN")
+        if not resolved_token:
+            raise ValueError(
+                "Token is required. Provide token parameter or set "
+                "WIREPUSHER_TOKEN environment variable."
+            )
 
-        self.token = token
-        self.timeout = timeout
-        self.max_retries = max_retries
+        # Parse timeout from env var if not provided
+        if timeout is not None:
+            resolved_timeout = timeout
+        else:
+            env_timeout = os.environ.get("WIREPUSHER_TIMEOUT")
+            resolved_timeout = float(env_timeout) if env_timeout else self.DEFAULT_TIMEOUT
+
+        # Parse max_retries from env var if not provided
+        if max_retries is not None:
+            resolved_max_retries = max_retries
+        else:
+            env_retries = os.environ.get("WIREPUSHER_MAX_RETRIES")
+            resolved_max_retries = int(env_retries) if env_retries else self.DEFAULT_MAX_RETRIES
+
+        self.token = resolved_token
+        self.timeout = resolved_timeout
+        self.max_retries = resolved_max_retries
         self.base_url = base_url or self.BASE_URL
-        self._client = httpx.AsyncClient(timeout=timeout)
+        self._client = httpx.AsyncClient(timeout=resolved_timeout)
 
         logger.debug(
             "AsyncWirePusher initialized with token=%s, timeout=%s, max_retries=%s",
-            token[:8] + "..." if len(token) > 8 else token,
-            timeout,
-            max_retries,
+            resolved_token[:8] + "..." if len(resolved_token) > 8 else resolved_token,
+            resolved_timeout,
+            resolved_max_retries,
         )
 
     async def __aenter__(self) -> "AsyncWirePusher":
@@ -164,7 +189,7 @@ class AsyncWirePusher:
             ...     )
         """
         # Normalize tags
-        normalized_tags = normalize_tags(tags)
+        normalized_tags = normalize_tags(tags) or None
         if normalized_tags != tags and tags:
             logger.debug("Tags normalized: %s -> %s", tags, normalized_tags)
 

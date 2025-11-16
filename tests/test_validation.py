@@ -7,12 +7,12 @@ class TestNormalizeTags:
     """Test tag normalization functionality."""
 
     def test_none_input(self):
-        """Test that None input returns None."""
-        assert normalize_tags(None) is None
+        """Test that None input returns empty list."""
+        assert normalize_tags(None) == []
 
     def test_empty_list(self):
-        """Test that empty list returns None."""
-        assert normalize_tags([]) is None
+        """Test that empty list returns empty list."""
+        assert normalize_tags([]) == []
 
     def test_single_tag(self):
         """Test normalization of single tag."""
@@ -42,8 +42,8 @@ class TestNormalizeTags:
             "release",
         ]
 
-    def test_invalid_characters_filtered(self):
-        """Test tags with invalid characters are filtered out."""
+    def test_invalid_characters_stripped(self):
+        """Test invalid characters are stripped from tags (not entire tag rejected)."""
         # Valid: alphanumeric, hyphens, underscores
         assert normalize_tags(["prod-1", "staging_2", "test123"]) == [
             "prod-1",
@@ -51,15 +51,21 @@ class TestNormalizeTags:
             "test123",
         ]
 
-        # Invalid: special characters
-        assert normalize_tags(["prod@", "test!", "deploy#"]) is None
-        assert normalize_tags(["prod.env", "test(1)", "deploy[2]"]) is None
+        # Invalid chars stripped: special characters removed
+        assert normalize_tags(["prod@", "test!", "deploy#"]) == ["prod", "test", "deploy"]
+        assert normalize_tags(["prod.env", "test(1)", "deploy[2]"]) == [
+            "prodenv",
+            "test1",
+            "deploy2",
+        ]
 
     def test_mixed_valid_invalid(self):
-        """Test filtering when mixing valid and invalid tags."""
+        """Test stripping when mixing valid and invalid chars."""
         assert normalize_tags(["production", "test@invalid", "release", "bad!"]) == [
             "production",
+            "testinvalid",
             "release",
+            "bad",
         ]
 
     def test_non_string_values_filtered(self):
@@ -69,10 +75,10 @@ class TestNormalizeTags:
             "release",
         ]
 
-    def test_all_filtered_returns_none(self):
-        """Test that if all tags are filtered out, None is returned."""
-        assert normalize_tags(["", "  ", "invalid!", "@#$"]) is None
-        assert normalize_tags([123, None, 456]) is None  # type: ignore
+    def test_all_filtered_returns_empty_list(self):
+        """Test that if all tags are filtered out, empty list is returned."""
+        assert normalize_tags(["", "  ", "@#$"]) == []
+        assert normalize_tags([123, None, 456]) == []  # type: ignore
 
     def test_order_preserved(self):
         """Test that order of tags is preserved."""
@@ -99,7 +105,8 @@ class TestNormalizeTags:
             "v1_0_0",
             "bad!tag",
         ]
-        expected = ["production", "release", "deploy-v2", "v1_0_0"]
+        # Invalid chars stripped, not entire tag rejected
+        expected = ["production", "release", "deploy-v2", "testinvalid", "v1_0_0", "badtag"]
         assert normalize_tags(tags) == expected
 
     def test_hyphen_underscore_allowed(self):
@@ -114,9 +121,16 @@ class TestNormalizeTags:
         """Test that numbers are allowed."""
         assert normalize_tags(["v123", "2024", "release-2"]) == ["v123", "2024", "release-2"]
 
-    def test_unicode_filtered(self):
-        """Test that unicode characters are filtered out."""
+    def test_unicode_stripped(self):
+        """Test that unicode characters are stripped from tags."""
+        # Unicode chars stripped, keeping valid ASCII chars
         assert normalize_tags(["production", "test-émoji", "release"]) == [
             "production",
+            "test-moji",
             "release",
         ]
+
+    def test_special_chars_completely_stripped(self):
+        """Test tags with only special chars become empty and are removed."""
+        assert normalize_tags(["@#$", "!!!", "..."]) == []
+        assert normalize_tags(["valid", "@#$", "also-valid"]) == ["valid", "also-valid"]

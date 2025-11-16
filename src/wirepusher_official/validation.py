@@ -4,49 +4,47 @@ import re
 from typing import List, Optional
 
 
-def normalize_tags(tags: Optional[List[str]]) -> Optional[List[str]]:
-    """Normalize tags by converting to lowercase, trimming whitespace, and removing duplicates.
+def normalize_tags(tags: Optional[List[str]]) -> List[str]:
+    """Normalize tags: lowercase, trim, strip invalid chars, remove duplicates.
 
     Args:
         tags: Optional list of tags to normalize
 
     Returns:
-        Normalized list of tags, or None if input is None
+        Normalized list of tags (empty list if no valid tags)
 
     Example:
         >>> normalize_tags(['Production', '  Release  ', 'production', 'Deploy'])
         ['production', 'release', 'deploy']
+        >>> normalize_tags(['special@chars!', 'valid-tag'])
+        ['specialchars', 'valid-tag']
     """
-    if tags is None:
-        return None
+    if tags is None or not tags:
+        return []
 
-    if not tags:  # Empty list
-        return None
-
-    # Normalize: lowercase, trim whitespace, remove empty strings
+    # Normalize: lowercase, trim whitespace, strip invalid chars, remove duplicates
     normalized = []
-    seen = set()
+    seen: set[str] = set()
 
     for tag in tags:
         if not isinstance(tag, str):
             continue
 
         # Lowercase and trim
-        normalized_tag = tag.lower().strip()
+        cleaned = tag.lower().strip()
+
+        # Strip invalid characters (keep only alphanumeric, hyphens, underscores)
+        cleaned = re.sub(r"[^a-z0-9_-]", "", cleaned)
 
         # Skip empty tags
-        if not normalized_tag:
+        if not cleaned:
             continue
 
         # Skip duplicates (case-insensitive)
-        if normalized_tag in seen:
+        if cleaned in seen:
             continue
 
-        # Validate characters (alphanumeric, hyphens, underscores only)
-        if not re.match(r"^[a-z0-9_-]+$", normalized_tag):
-            continue
+        normalized.append(cleaned)
+        seen.add(cleaned)
 
-        normalized.append(normalized_tag)
-        seen.add(normalized_tag)
-
-    return normalized if normalized else None
+    return normalized
