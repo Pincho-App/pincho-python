@@ -93,6 +93,22 @@ except RateLimitError:
 
 Automatic retry with exponential backoff for network errors, 5xx, and 429 (rate limit).
 
+## Smart Rate Limiting
+
+The library automatically handles rate limits with Retry-After header support:
+
+```python
+with WirePusher() as client:
+    client.send('Alert', 'Message')
+
+    # Check rate limit status after any request
+    if client.last_rate_limit:
+        print(f"Remaining: {client.last_rate_limit.remaining}/{client.last_rate_limit.limit}")
+        print(f"Resets at: {client.last_rate_limit.reset}")
+```
+
+See [Advanced Documentation](docs/ADVANCED.md) for detailed rate limit monitoring patterns.
+
 ## Links
 
 - **Get Token**: App → Settings → Help → copy token

@@ -118,7 +118,7 @@ We recognize security researchers who responsibly disclose vulnerabilities:
 
 ## Questions?
 
-If you have questions about this security policy, please open a public issue or contact the maintainers.
+If you have questions about this security policy, please open a public issue or contact us at **support@wirepusher.dev**.
 
 ---
 
