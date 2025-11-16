@@ -3,10 +3,12 @@
 import asyncio
 import logging
 import os
+from datetime import datetime
 from typing import List, Optional
 
 import httpx
 
+from wirepusher_official import __version__
 from wirepusher_official.crypto import encrypt_message, generate_iv
 from wirepusher_official.exceptions import (
     AuthenticationError,
@@ -21,6 +23,7 @@ from wirepusher_official.models import (
     NotifAIResponse,
     NotificationRequest,
     NotificationResponse,
+    RateLimitInfo,
 )
 from wirepusher_official.validation import normalize_tags
 
@@ -113,7 +116,11 @@ class AsyncWirePusher:
         self.timeout = resolved_timeout
         self.max_retries = resolved_max_retries
         self.base_url = base_url or self.BASE_URL
-        self._client = httpx.AsyncClient(timeout=resolved_timeout)
+        self._client = httpx.AsyncClient(
+            timeout=resolved_timeout,
+            headers={"User-Agent": f"wirepusher-python/{__version__}"},
+        )
+        self.last_rate_limit: Optional[RateLimitInfo] = None
 
         logger.debug(
             "AsyncWirePusher initialized with token=%s, timeout=%s, max_retries=%s",
@@ -282,6 +289,17 @@ class AsyncWirePusher:
                         "Authorization": f"Bearer {self.token}",
                     },
                 )
+
+                # Parse rate limit headers from response
+                self.last_rate_limit = self._parse_rate_limit_headers(response)
+                if self.last_rate_limit:
+                    logger.debug(
+                        "Rate limit info: %d/%d remaining, resets at %s",
+                        self.last_rate_limit.remaining,
+                        self.last_rate_limit.limit,
+                        self.last_rate_limit.reset,
+                    )
+
                 response.raise_for_status()
 
                 data = response.json()
@@ -293,6 +311,10 @@ class AsyncWirePusher:
 
             except httpx.HTTPStatusError as e:
                 last_exception = e
+
+                # Parse rate limit headers even on error responses
+                self.last_rate_limit = self._parse_rate_limit_headers(e.response)
+
                 error = self._handle_http_error(e)
 
                 # Don't retry non-retryable errors
@@ -301,7 +323,20 @@ class AsyncWirePusher:
 
                 # Retry logic for retryable errors
                 if attempt < self.max_retries:
-                    backoff = self._calculate_backoff(attempt, isinstance(error, RateLimitError))
+                    # Use Retry-After header if available for rate limits
+                    if isinstance(error, RateLimitError):
+                        retry_after = e.response.headers.get("Retry-After")
+                        if retry_after:
+                            try:
+                                backoff = float(retry_after)
+                                logger.debug("Using Retry-After header: %.1fs", backoff)
+                            except ValueError:
+                                backoff = self._calculate_backoff(attempt, is_rate_limit=True)
+                        else:
+                            backoff = self._calculate_backoff(attempt, is_rate_limit=True)
+                    else:
+                        backoff = self._calculate_backoff(attempt, is_rate_limit=False)
+
                     logger.warning(
                         "Retryable error (attempt %d/%d): %s. Retrying in %.1fs",
                         attempt + 1,
@@ -366,6 +401,17 @@ class AsyncWirePusher:
                         "Authorization": f"Bearer {self.token}",
                     },
                 )
+
+                # Parse rate limit headers from response
+                self.last_rate_limit = self._parse_rate_limit_headers(response)
+                if self.last_rate_limit:
+                    logger.debug(
+                        "Rate limit info: %d/%d remaining, resets at %s",
+                        self.last_rate_limit.remaining,
+                        self.last_rate_limit.limit,
+                        self.last_rate_limit.reset,
+                    )
+
                 response.raise_for_status()
 
                 data = response.json()
@@ -378,6 +424,10 @@ class AsyncWirePusher:
 
             except httpx.HTTPStatusError as e:
                 last_exception = e
+
+                # Parse rate limit headers even on error responses
+                self.last_rate_limit = self._parse_rate_limit_headers(e.response)
+
                 error = self._handle_http_error(e)
 
                 # Don't retry non-retryable errors
@@ -386,7 +436,20 @@ class AsyncWirePusher:
 
                 # Retry logic for retryable errors
                 if attempt < self.max_retries:
-                    backoff = self._calculate_backoff(attempt, isinstance(error, RateLimitError))
+                    # Use Retry-After header if available for rate limits
+                    if isinstance(error, RateLimitError):
+                        retry_after = e.response.headers.get("Retry-After")
+                        if retry_after:
+                            try:
+                                backoff = float(retry_after)
+                                logger.debug("Using Retry-After header: %.1fs", backoff)
+                            except ValueError:
+                                backoff = self._calculate_backoff(attempt, is_rate_limit=True)
+                        else:
+                            backoff = self._calculate_backoff(attempt, is_rate_limit=True)
+                    else:
+                        backoff = self._calculate_backoff(attempt, is_rate_limit=False)
+
                     logger.warning(
                         "Retryable error (attempt %d/%d): %s. Retrying in %.1fs",
                         attempt + 1,
@@ -500,3 +563,28 @@ class AsyncWirePusher:
 
         delay = base_delay * (2**attempt)
         return float(min(delay, self.MAX_BACKOFF))
+
+    def _parse_rate_limit_headers(self, response: httpx.Response) -> Optional[RateLimitInfo]:
+        """Parse rate limit headers from API response.
+
+        Args:
+            response: HTTP response from API
+
+        Returns:
+            RateLimitInfo if all headers present, None otherwise
+        """
+        limit = response.headers.get("RateLimit-Limit")
+        remaining = response.headers.get("RateLimit-Remaining")
+        reset = response.headers.get("RateLimit-Reset")
+
+        if limit and remaining and reset:
+            try:
+                return RateLimitInfo(
+                    limit=int(limit),
+                    remaining=int(remaining),
+                    reset=datetime.fromtimestamp(int(reset)),
+                )
+            except (ValueError, TypeError, OSError) as e:
+                logger.debug("Failed to parse rate limit headers: %s", e)
+                return None
+        return None

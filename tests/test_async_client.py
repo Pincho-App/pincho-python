@@ -368,3 +368,222 @@ class TestAsyncWirePusher:
 
         body = json.loads(request.content.decode())
         assert "token" not in body
+
+    @pytest.mark.asyncio
+    async def test_user_agent_header_sent(self, httpx_mock: HTTPXMock) -> None:
+        """Test that User-Agent header is sent with requests."""
+        from wirepusher_official import __version__
+
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={"status": "success", "message": "Notification sent"},
+            status_code=200,
+        )
+
+        async with AsyncWirePusher(token="abc12345") as client:
+            await client.send("Test Title", "Test message")
+
+        # Verify User-Agent header is sent
+        request = httpx_mock.get_request()
+        assert request is not None
+        assert request.headers["User-Agent"] == f"wirepusher-python/{__version__}"
+
+    @pytest.mark.asyncio
+    async def test_rate_limit_headers_parsed(self, httpx_mock: HTTPXMock) -> None:
+        """Test that rate limit headers are parsed from response."""
+        import time
+
+        reset_time = int(time.time()) + 3600  # 1 hour from now
+
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={"status": "success", "message": "Notification sent"},
+            status_code=200,
+            headers={
+                "RateLimit-Limit": "100",
+                "RateLimit-Remaining": "95",
+                "RateLimit-Reset": str(reset_time),
+            },
+        )
+
+        async with AsyncWirePusher(token="abc12345") as client:
+            await client.send("Test Title", "Test message")
+
+            # Verify rate limit info is stored
+            assert client.last_rate_limit is not None
+            assert client.last_rate_limit.limit == 100
+            assert client.last_rate_limit.remaining == 95
+            assert int(client.last_rate_limit.reset.timestamp()) == reset_time
+
+    @pytest.mark.asyncio
+    async def test_rate_limit_headers_missing(self, httpx_mock: HTTPXMock) -> None:
+        """Test that missing rate limit headers result in None."""
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={"status": "success", "message": "Notification sent"},
+            status_code=200,
+        )
+
+        async with AsyncWirePusher(token="abc12345") as client:
+            await client.send("Test Title", "Test message")
+
+            # Verify rate limit info is None when headers are missing
+            assert client.last_rate_limit is None
+
+    @pytest.mark.asyncio
+    async def test_rate_limit_headers_partial(self, httpx_mock: HTTPXMock) -> None:
+        """Test that partial rate limit headers result in None."""
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={"status": "success", "message": "Notification sent"},
+            status_code=200,
+            headers={
+                "RateLimit-Limit": "100",
+                # Missing RateLimit-Remaining and RateLimit-Reset
+            },
+        )
+
+        async with AsyncWirePusher(token="abc12345") as client:
+            await client.send("Test Title", "Test message")
+
+            # Verify rate limit info is None when headers are incomplete
+            assert client.last_rate_limit is None
+
+    @pytest.mark.asyncio
+    async def test_rate_limit_headers_on_error(self, httpx_mock: HTTPXMock) -> None:
+        """Test that rate limit headers are parsed even on error responses."""
+        import time
+
+        reset_time = int(time.time()) + 3600
+
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={
+                "status": "error",
+                "error": {
+                    "type": "validation_error",
+                    "code": "missing_required_field",
+                    "message": "Title is required",
+                },
+            },
+            status_code=400,
+            headers={
+                "RateLimit-Limit": "100",
+                "RateLimit-Remaining": "99",
+                "RateLimit-Reset": str(reset_time),
+            },
+        )
+
+        async with AsyncWirePusher(token="abc12345") as client:
+            with pytest.raises(ValidationError):
+                await client.send("", "Test message")
+
+            # Rate limit info should still be parsed on error
+            assert client.last_rate_limit is not None
+            assert client.last_rate_limit.limit == 100
+            assert client.last_rate_limit.remaining == 99
+
+    @pytest.mark.asyncio
+    async def test_retry_after_header_used(self, httpx_mock: HTTPXMock) -> None:
+        """Test that Retry-After header is used for backoff on 429."""
+        # First request: 429 with Retry-After
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={
+                "status": "error",
+                "error": {
+                    "type": "rate_limit_error",
+                    "code": "too_many_requests",
+                    "message": "Rate limit exceeded",
+                },
+            },
+            status_code=429,
+            headers={"Retry-After": "0.1"},  # Use short delay for test
+        )
+        # Second request: success
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={"status": "success", "message": "Notification sent"},
+            status_code=200,
+        )
+
+        async with AsyncWirePusher(token="abc12345", max_retries=1) as client:
+            import time
+
+            start_time = time.time()
+            response = await client.send("Test Title", "Test message")
+            elapsed = time.time() - start_time
+
+            assert response.status == "success"
+            # Should have waited at least 0.1 seconds (from Retry-After)
+            # but less than 5 seconds (which would be the default rate limit backoff)
+            assert 0.1 <= elapsed < 5.0
+
+    @pytest.mark.asyncio
+    async def test_retry_after_header_invalid_uses_calculated(self, httpx_mock: HTTPXMock) -> None:
+        """Test that invalid Retry-After header falls back to calculated backoff."""
+        # First request: 429 with invalid Retry-After
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={
+                "status": "error",
+                "error": {
+                    "type": "rate_limit_error",
+                    "code": "too_many_requests",
+                    "message": "Rate limit exceeded",
+                },
+            },
+            status_code=429,
+            headers={"Retry-After": "invalid"},  # Invalid value
+        )
+        # Second request: success
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={"status": "success", "message": "Notification sent"},
+            status_code=200,
+        )
+
+        async with AsyncWirePusher(token="abc12345", max_retries=1) as client:
+            response = await client.send("Test Title", "Test message")
+            # Should still succeed with calculated backoff
+            assert response.status == "success"
+
+    @pytest.mark.asyncio
+    async def test_notifai_parses_rate_limit_headers(self, httpx_mock: HTTPXMock) -> None:
+        """Test that NotifAI endpoint also parses rate limit headers."""
+        import time
+
+        reset_time = int(time.time()) + 3600
+
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "success",
+                "message": "Notification generated",
+                "notification": {"title": "Test"},
+            },
+            status_code=200,
+            headers={
+                "RateLimit-Limit": "50",
+                "RateLimit-Remaining": "45",
+                "RateLimit-Reset": str(reset_time),
+            },
+        )
+
+        async with AsyncWirePusher(token="abc12345") as client:
+            await client.notifai("test text")
+
+            # Verify rate limit info is stored
+            assert client.last_rate_limit is not None
+            assert client.last_rate_limit.limit == 50
+            assert client.last_rate_limit.remaining == 45

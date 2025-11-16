@@ -1,6 +1,7 @@
 """Data models for WirePusher library."""
 
 from dataclasses import asdict, dataclass
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 
@@ -88,3 +89,18 @@ class NotifAIResponse:
     status: str
     message: str
     notification: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class RateLimitInfo:
+    """Rate limit information from API response headers.
+
+    Args:
+        limit: Maximum number of requests allowed in the current window
+        remaining: Number of requests remaining in the current window
+        reset: Datetime when the rate limit window resets
+    """
+
+    limit: int
+    remaining: int
+    reset: datetime
