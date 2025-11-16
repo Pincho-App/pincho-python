@@ -21,7 +21,7 @@ steps:
       - '-c'
       - |
         pip install -e ".[dev]"
-        mypy src/wirepusher
+        mypy src/wirepusher_official
 
   # Step 3: Check code formatting with black
   - name: 'python:3.11'

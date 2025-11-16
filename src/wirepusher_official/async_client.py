@@ -6,8 +6,8 @@ from typing import List, Optional
 
 import httpx
 
-from wirepusher.crypto import encrypt_message, generate_iv
-from wirepusher.exceptions import (
+from wirepusher_official.crypto import encrypt_message, generate_iv
+from wirepusher_official.exceptions import (
     AuthenticationError,
     NetworkError,
     RateLimitError,
@@ -15,15 +15,15 @@ from wirepusher.exceptions import (
     ValidationError,
     WirePusherError,
 )
-from wirepusher.models import (
+from wirepusher_official.models import (
     NotifAIRequest,
     NotifAIResponse,
     NotificationRequest,
     NotificationResponse,
 )
-from wirepusher.validation import normalize_tags
+from wirepusher_official.validation import normalize_tags
 
-logger = logging.getLogger("wirepusher")
+logger = logging.getLogger("wirepusher_official")
 
 
 class AsyncWirePusher:

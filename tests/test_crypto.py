@@ -2,7 +2,7 @@
 
 import os
 
-from wirepusher.crypto import (
+from wirepusher_official.crypto import (
     custom_base64_encode,
     derive_encryption_key,
     encrypt_message,

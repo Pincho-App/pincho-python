@@ -3,7 +3,7 @@
 import asyncio
 import os
 
-from wirepusher import AsyncWirePusher
+from wirepusher_official import AsyncWirePusher
 
 # Get token from environment variable
 TOKEN = os.getenv("WIREPUSHER_TOKEN", "abc12345")

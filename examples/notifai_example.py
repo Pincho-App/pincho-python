@@ -12,8 +12,8 @@ The AI automatically generates:
 
 import os
 
-from wirepusher import WirePusher
-from wirepusher.exceptions import WirePusherError
+from wirepusher_official import WirePusher
+from wirepusher_official.exceptions import WirePusherError
 
 # Get token from environment variable
 TOKEN = os.getenv("WIREPUSHER_TOKEN", "abc12345")

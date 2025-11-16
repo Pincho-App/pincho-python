@@ -11,7 +11,7 @@ Requirements:
 
 import os
 
-from wirepusher import WirePusher
+from wirepusher_official import WirePusher
 
 
 def main():

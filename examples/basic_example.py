@@ -2,7 +2,7 @@
 
 import os
 
-from wirepusher import WirePusher
+from wirepusher_official import WirePusher
 
 # Get token from environment variable
 TOKEN = os.getenv("WIREPUSHER_TOKEN", "abc12345")

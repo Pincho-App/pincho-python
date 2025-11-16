@@ -4,8 +4,8 @@ import httpx
 import pytest
 from pytest_httpx import HTTPXMock
 
-from wirepusher import WirePusher
-from wirepusher.exceptions import (
+from wirepusher_official import WirePusher
+from wirepusher_official.exceptions import (
     AuthenticationError,
     ValidationError,
     WirePusherError,

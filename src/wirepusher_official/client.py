@@ -4,12 +4,12 @@ import asyncio
 import logging
 from typing import Any, Coroutine, List, Optional, TypeVar
 
-from wirepusher.async_client import AsyncWirePusher
-from wirepusher.models import NotifAIResponse, NotificationResponse
+from wirepusher_official.async_client import AsyncWirePusher
+from wirepusher_official.models import NotifAIResponse, NotificationResponse
 
 T = TypeVar("T")
 
-logger = logging.getLogger("wirepusher")
+logger = logging.getLogger("wirepusher_official")
 
 
 class WirePusher:
