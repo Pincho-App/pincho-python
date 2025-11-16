@@ -587,3 +587,198 @@ class TestAsyncWirePusher:
             assert client.last_rate_limit is not None
             assert client.last_rate_limit.limit == 50
             assert client.last_rate_limit.remaining == 45
+
+    @pytest.mark.asyncio
+    async def test_notifai_retry_with_retry_after_header(self, httpx_mock: HTTPXMock) -> None:
+        """Test that NotifAI retries with Retry-After header on 429."""
+        # First request: 429 with Retry-After
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "error",
+                "error": {
+                    "type": "rate_limit_error",
+                    "code": "too_many_requests",
+                    "message": "Rate limit exceeded",
+                },
+            },
+            status_code=429,
+            headers={"Retry-After": "0.1"},
+        )
+        # Second request: success
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "success",
+                "message": "Notification generated",
+                "notification": {"title": "AI Generated"},
+            },
+            status_code=200,
+        )
+
+        async with AsyncWirePusher(token="abc12345", max_retries=1) as client:
+            response = await client.notifai("test text")
+            assert response.status == "success"
+            assert response.notification is not None
+
+    @pytest.mark.asyncio
+    async def test_notifai_retry_with_invalid_retry_after(self, httpx_mock: HTTPXMock) -> None:
+        """Test that NotifAI falls back to calculated backoff with invalid Retry-After."""
+        # First request: 429 with invalid Retry-After
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "error",
+                "error": {
+                    "type": "rate_limit_error",
+                    "code": "too_many_requests",
+                    "message": "Rate limit exceeded",
+                },
+            },
+            status_code=429,
+            headers={"Retry-After": "invalid"},
+        )
+        # Second request: success
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "success",
+                "message": "Notification generated",
+                "notification": {"title": "AI Generated"},
+            },
+            status_code=200,
+        )
+
+        async with AsyncWirePusher(token="abc12345", max_retries=1) as client:
+            response = await client.notifai("test text")
+            assert response.status == "success"
+
+    @pytest.mark.asyncio
+    async def test_notifai_retries_server_error(self, httpx_mock: HTTPXMock) -> None:
+        """Test that NotifAI retries on server errors (5xx)."""
+        # First request: 500 server error
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "error",
+                "error": {
+                    "type": "server_error",
+                    "code": "internal_error",
+                    "message": "Internal server error",
+                },
+            },
+            status_code=500,
+        )
+        # Second request: success
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "success",
+                "message": "Notification generated",
+                "notification": {"title": "AI Generated"},
+            },
+            status_code=200,
+        )
+
+        async with AsyncWirePusher(token="abc12345", max_retries=1) as client:
+            response = await client.notifai("test text")
+            assert response.status == "success"
+
+    @pytest.mark.asyncio
+    async def test_notifai_retries_network_error(self, httpx_mock: HTTPXMock) -> None:
+        """Test that NotifAI retries on network errors."""
+        # First request: network error
+        httpx_mock.add_exception(httpx.ConnectError("Connection refused"))
+        # Second request: success
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "success",
+                "message": "Notification generated",
+                "notification": {"title": "AI Generated"},
+            },
+            status_code=200,
+        )
+
+        async with AsyncWirePusher(token="abc12345", max_retries=1) as client:
+            response = await client.notifai("test text")
+            assert response.status == "success"
+
+    @pytest.mark.asyncio
+    async def test_http_error_with_non_json_response(self, httpx_mock: HTTPXMock) -> None:
+        """Test that HTTP errors with non-JSON responses fall back to raw text."""
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            content=b"Internal Server Error",  # Not JSON
+            status_code=500,
+        )
+
+        async with AsyncWirePusher(token="abc12345", max_retries=0) as client:
+            from wirepusher_official.exceptions import ServerError
+
+            with pytest.raises(ServerError) as exc_info:
+                await client.send("Test", "Message")
+            # Error message should contain raw response text
+            assert "Internal Server Error" in str(exc_info.value)
+
+    @pytest.mark.asyncio
+    async def test_notifai_non_retryable_error_not_retried(self, httpx_mock: HTTPXMock) -> None:
+        """Test that NotifAI does not retry non-retryable errors."""
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "error",
+                "error": {
+                    "type": "validation_error",
+                    "code": "text_too_short",
+                    "message": "Text is too short",
+                },
+            },
+            status_code=400,
+        )
+
+        async with AsyncWirePusher(token="abc12345", max_retries=3) as client:
+            with pytest.raises(ValidationError):
+                await client.notifai("hi")  # Too short
+
+            # Should only have one request (no retries)
+            requests = httpx_mock.get_requests()
+            assert len(requests) == 1
+
+    @pytest.mark.asyncio
+    async def test_notifai_exhausts_retries(self, httpx_mock: HTTPXMock) -> None:
+        """Test that NotifAI raises error after exhausting retries."""
+        from wirepusher_official.exceptions import ServerError
+
+        # All requests fail with server error
+        for _ in range(3):  # max_retries + 1
+            httpx_mock.add_response(
+                method="POST",
+                url="https://api.wirepusher.dev/notifai",
+                json={
+                    "status": "error",
+                    "error": {
+                        "type": "server_error",
+                        "code": "internal_error",
+                        "message": "Server unavailable",
+                    },
+                },
+                status_code=500,
+            )
+
+        async with AsyncWirePusher(token="abc12345", max_retries=2) as client:
+            with pytest.raises(ServerError):
+                await client.notifai("test text")
+
+            # Should have made 3 attempts (initial + 2 retries)
+            requests = httpx_mock.get_requests()
+            assert len(requests) == 3

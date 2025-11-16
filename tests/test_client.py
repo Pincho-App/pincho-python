@@ -260,3 +260,75 @@ class TestWirePusher:
             response = client.send("Test Title", "Test message")
             assert response.status == "unknown"
             assert response.message == ""
+
+    def test_last_rate_limit_property(self, httpx_mock: HTTPXMock) -> None:
+        """Test that sync client exposes last_rate_limit property."""
+        import time
+
+        reset_time = int(time.time()) + 3600
+
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/send",
+            json={"status": "success", "message": "Notification sent"},
+            status_code=200,
+            headers={
+                "RateLimit-Limit": "100",
+                "RateLimit-Remaining": "95",
+                "RateLimit-Reset": str(reset_time),
+            },
+        )
+
+        with WirePusher(token="abc12345") as client:
+            client.send("Test", "Message")
+
+            # Access rate limit info through sync wrapper
+            rate_limit = client.last_rate_limit
+            assert rate_limit is not None
+            assert rate_limit.limit == 100
+            assert rate_limit.remaining == 95
+
+    def test_notifai_success(self, httpx_mock: HTTPXMock) -> None:
+        """Test successful NotifAI call through sync client."""
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "success",
+                "message": "Notification generated",
+                "notification": {
+                    "title": "Deployment Complete",
+                    "message": "Version 2.1.3 deployed",
+                    "type": "deployment",
+                },
+            },
+            status_code=200,
+        )
+
+        with WirePusher(token="abc12345") as client:
+            response = client.notifai("deployment finished, v2.1.3 is live")
+            assert response.status == "success"
+            assert response.notification is not None
+            assert response.notification.get("title") == "Deployment Complete"
+
+    def test_notifai_validation_error(self, httpx_mock: HTTPXMock) -> None:
+        """Test NotifAI validation error through sync client."""
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.wirepusher.dev/notifai",
+            json={
+                "status": "error",
+                "error": {
+                    "type": "validation_error",
+                    "code": "text_too_short",
+                    "message": "Text must be at least 5 characters",
+                    "param": "text",
+                },
+            },
+            status_code=400,
+        )
+
+        with WirePusher(token="abc12345") as client:
+            with pytest.raises(ValidationError) as exc_info:
+                client.notifai("hi")
+            assert "text_too_short" in str(exc_info.value)
