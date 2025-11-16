@@ -16,11 +16,11 @@ Official Python client library for [WirePusher](https://wirepusher.dev) push not
 ## Quick Start
 
 ```bash
-pip install wirepusher
+pip install wirepusher_official
 ```
 
 ```python
-from wirepusher import WirePusher
+from wirepusher_official import WirePusher
 
 # Initialize with your token
 with WirePusher(token='YOUR_TOKEN') as client:
@@ -37,7 +37,7 @@ with WirePusher(token='YOUR_TOKEN') as client:
 ### All Parameters
 
 ```python
-from wirepusher import WirePusher
+from wirepusher_official import WirePusher
 
 with WirePusher(token='abc12345') as client:
     response = client.send(
@@ -54,7 +54,7 @@ with WirePusher(token='abc12345') as client:
 
 ```python
 import asyncio
-from wirepusher import AsyncWirePusher
+from wirepusher_official import AsyncWirePusher
 
 async def send_notification():
     async with AsyncWirePusher(token='abc12345') as client:
@@ -72,7 +72,7 @@ asyncio.run(send_notification())
 Let AI generate structured notifications from free-form text using Gemini:
 
 ```python
-from wirepusher import WirePusher
+from wirepusher_official import WirePusher
 
 with WirePusher(token='abc12345') as client:
     response = client.notifai(
@@ -111,7 +111,7 @@ Enable debug logging using Python's standard `logging` module:
 
 ```python
 import logging
-from wirepusher import WirePusher
+from wirepusher_official import WirePusher
 
 # Enable debug logging
 logging.basicConfig(level=logging.DEBUG)
@@ -192,7 +192,7 @@ Generate AI-powered notification from free-form text.
 ## Error Handling
 
 ```python
-from wirepusher import WirePusher, AuthenticationError, ValidationError
+from wirepusher_official import WirePusher, AuthenticationError, ValidationError
 
 try:
     with WirePusher(token='abc12345') as client:
@@ -243,7 +243,7 @@ The API returns comprehensive error responses with `type`, `code`, `message`, an
 ### CI/CD Pipeline
 
 ```python
-from wirepusher import WirePusher
+from wirepusher_official import WirePusher
 
 def notify_deployment(version, environment):
     with WirePusher(token=os.getenv('WIREPUSHER_TOKEN')) as client:
@@ -258,7 +258,7 @@ def notify_deployment(version, environment):
 ### Server Monitoring
 
 ```python
-from wirepusher import WirePusher
+from wirepusher_official import WirePusher
 import psutil
 
 def check_server_health():
