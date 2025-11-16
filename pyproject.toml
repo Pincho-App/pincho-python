@@ -41,10 +41,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://gitlab.com/wirepusher/python-sdk"
-Documentation = "https://gitlab.com/wirepusher/python-sdk/-/blob/main/README.md"
-Repository = "https://gitlab.com/wirepusher/python-sdk"
-Issues = "https://gitlab.com/wirepusher/python-sdk/-/issues"
+Homepage = "https://gitlab.com/wirepusher/wirepusher-python"
+Documentation = "https://gitlab.com/wirepusher/wirepusher-python/-/blob/main/README.md"
+Repository = "https://gitlab.com/wirepusher/wirepusher-python"
+Issues = "https://gitlab.com/wirepusher/wirepusher-python/-/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
