@@ -54,7 +54,7 @@ steps:
       - '-c'
       - |
         pip install -e ".[dev]"
-        pytest --cov=wirepusher --cov-report=term-missing --cov-report=xml
+        pytest --cov=wirepusher_official --cov-report=term-missing --cov-report=xml
 
         # Verify minimum coverage threshold (85%)
         coverage report --fail-under=85
