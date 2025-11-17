@@ -121,7 +121,8 @@ steps:
           -H "Authorization: Bearer $$WIREPUSHER_TOKEN" \
           -H "Content-Type: application/json" \
           -d "{
-            \"text\": \"WirePusher Python SDK $TAG_NAME published to PyPI successfully. Install via pip install wirepusher-official. View package at https://pypi.org/project/wirepusher-official/\"
+            \"text\": \"WirePusher Python SDK $TAG_NAME published to PyPI successfully. Install via pip install wirepusher-official. View package at https://pypi.org/project/wirepusher-official/\",
+            \"type\": \"release\"
           }"
 
         echo ""
