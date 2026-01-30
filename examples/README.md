@@ -8,7 +8,7 @@ Before running examples:
 
 1. **Install the library**:
    ```bash
-   pip install pincho
+   pip install pincho-sdk
    ```
 
 2. **Set your API token**:

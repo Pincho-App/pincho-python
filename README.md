@@ -5,7 +5,7 @@ Official Python client for [Pincho](https://pincho.dev) push notifications.
 ## Installation
 
 ```bash
-pip install pincho
+pip install pincho-sdk
 ```
 
 ## Quick Start
