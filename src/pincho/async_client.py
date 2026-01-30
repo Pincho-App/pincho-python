@@ -51,7 +51,7 @@ class AsyncPincho:
         >>> asyncio.run(main())
     """
 
-    BASE_URL = "https://api.pincho.dev"
+    BASE_URL = "https://api.pincho.app"
     DEFAULT_TIMEOUT = 30.0
     DEFAULT_MAX_RETRIES = 3
     MAX_BACKOFF = 30.0  # Maximum retry delay in seconds

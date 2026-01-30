@@ -88,7 +88,7 @@ class TestAsyncPincho:
         """Test successful notification send."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent successfully"},
             status_code=200,
         )
@@ -103,7 +103,7 @@ class TestAsyncPincho:
         """Test send with all optional parameters."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
         )
@@ -137,7 +137,7 @@ class TestAsyncPincho:
         """Test 401 authentication error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -160,7 +160,7 @@ class TestAsyncPincho:
         """Test 400 validation error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -186,7 +186,7 @@ class TestAsyncPincho:
         """Test 403 forbidden error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -209,7 +209,7 @@ class TestAsyncPincho:
         """Test 404 not found error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -234,7 +234,7 @@ class TestAsyncPincho:
         for _ in range(4):
             httpx_mock.add_response(
                 method="POST",
-                url="https://api.pincho.dev/send",
+                url="https://api.pincho.app/send",
                 json={
                     "status": "error",
                     "error": {
@@ -281,7 +281,7 @@ class TestAsyncPincho:
         """Test handling of malformed JSON response."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             content=b"not json",
             status_code=200,
         )
@@ -296,7 +296,7 @@ class TestAsyncPincho:
         """Test handling of response with missing fields."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={},
             status_code=200,
         )
@@ -315,7 +315,7 @@ class TestAsyncPincho:
         for _ in range(3):
             httpx_mock.add_response(
                 method="POST",
-                url="https://api.pincho.dev/send",
+                url="https://api.pincho.app/send",
                 json={"status": "success", "message": "Notification sent"},
                 status_code=200,
             )
@@ -335,7 +335,7 @@ class TestAsyncPincho:
         """Test successful NotifAI notification generation."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "success",
                 "message": "Notification generated and sent successfully",
@@ -376,7 +376,7 @@ class TestAsyncPincho:
 
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
         )
@@ -398,7 +398,7 @@ class TestAsyncPincho:
 
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
             headers={
@@ -422,7 +422,7 @@ class TestAsyncPincho:
         """Test that missing rate limit headers result in None."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
         )
@@ -438,7 +438,7 @@ class TestAsyncPincho:
         """Test that partial rate limit headers result in None."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
             headers={
@@ -462,7 +462,7 @@ class TestAsyncPincho:
 
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -494,7 +494,7 @@ class TestAsyncPincho:
         # First request: 429 with Retry-After
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -509,7 +509,7 @@ class TestAsyncPincho:
         # Second request: success
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
         )
@@ -532,7 +532,7 @@ class TestAsyncPincho:
         # First request: 429 with invalid Retry-After
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -547,7 +547,7 @@ class TestAsyncPincho:
         # Second request: success
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
         )
@@ -566,7 +566,7 @@ class TestAsyncPincho:
 
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "success",
                 "message": "Notification generated",
@@ -594,7 +594,7 @@ class TestAsyncPincho:
         # First request: 429 with Retry-After
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "error",
                 "error": {
@@ -609,7 +609,7 @@ class TestAsyncPincho:
         # Second request: success
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "success",
                 "message": "Notification generated",
@@ -629,7 +629,7 @@ class TestAsyncPincho:
         # First request: 429 with invalid Retry-After
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "error",
                 "error": {
@@ -644,7 +644,7 @@ class TestAsyncPincho:
         # Second request: success
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "success",
                 "message": "Notification generated",
@@ -663,7 +663,7 @@ class TestAsyncPincho:
         # First request: 500 server error
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "error",
                 "error": {
@@ -677,7 +677,7 @@ class TestAsyncPincho:
         # Second request: success
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "success",
                 "message": "Notification generated",
@@ -698,7 +698,7 @@ class TestAsyncPincho:
         # Second request: success
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "success",
                 "message": "Notification generated",
@@ -716,7 +716,7 @@ class TestAsyncPincho:
         """Test that HTTP errors with non-JSON responses fall back to raw text."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             content=b"Internal Server Error",  # Not JSON
             status_code=500,
         )
@@ -734,7 +734,7 @@ class TestAsyncPincho:
         """Test that NotifAI does not retry non-retryable errors."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "error",
                 "error": {
@@ -763,7 +763,7 @@ class TestAsyncPincho:
         for _ in range(3):  # max_retries + 1
             httpx_mock.add_response(
                 method="POST",
-                url="https://api.pincho.dev/notifai",
+                url="https://api.pincho.app/notifai",
                 json={
                     "status": "error",
                     "error": {

@@ -20,11 +20,13 @@ class TestPincho:
         client = Pincho(token="abc12345")
         assert client._async_client.token == "abc12345"
         assert client._async_client.timeout == 30.0
-        assert client._async_client.base_url == "https://api.pincho.dev"
+        assert client._async_client.base_url == "https://api.pincho.app"
         client.close()
 
-    def test_init_missing_token_raises_error(self) -> None:
+    def test_init_missing_token_raises_error(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that missing token raises ValueError."""
+        # Clear env var to ensure test works in CI where PINCHO_TOKEN is set
+        monkeypatch.delenv("PINCHO_TOKEN", raising=False)
         with pytest.raises(ValueError, match="Token is required"):
             Pincho(token="")
 
@@ -53,7 +55,7 @@ class TestPincho:
         """Test successful notification send."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent successfully"},
             status_code=200,
         )
@@ -67,7 +69,7 @@ class TestPincho:
         """Test send with all optional parameters."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
         )
@@ -100,7 +102,7 @@ class TestPincho:
         """Test 401 authentication error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -122,7 +124,7 @@ class TestPincho:
         """Test 400 validation error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -147,7 +149,7 @@ class TestPincho:
         """Test 403 forbidden error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -169,7 +171,7 @@ class TestPincho:
         """Test 404 not found error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={
                 "status": "error",
                 "error": {
@@ -193,7 +195,7 @@ class TestPincho:
         for _ in range(4):
             httpx_mock.add_response(
                 method="POST",
-                url="https://api.pincho.dev/send",
+                url="https://api.pincho.app/send",
                 json={
                     "status": "error",
                     "error": {
@@ -237,7 +239,7 @@ class TestPincho:
         """Test handling of malformed JSON response."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             content=b"not json",
             status_code=200,
         )
@@ -251,7 +253,7 @@ class TestPincho:
         """Test handling of response with missing fields."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={},
             status_code=200,
         )
@@ -269,7 +271,7 @@ class TestPincho:
 
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/send",
+            url="https://api.pincho.app/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
             headers={
@@ -292,7 +294,7 @@ class TestPincho:
         """Test successful NotifAI call through sync client."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "success",
                 "message": "Notification generated",
@@ -315,7 +317,7 @@ class TestPincho:
         """Test NotifAI validation error through sync client."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.pincho.dev/notifai",
+            url="https://api.pincho.app/notifai",
             json={
                 "status": "error",
                 "error": {
