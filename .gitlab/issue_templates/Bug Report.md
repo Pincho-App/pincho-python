@@ -21,7 +21,7 @@ Steps to reproduce the behavior:
 ## Minimal Code Example
 
 ```python
-from wirepusher import WirePusher
+from pincho import Pincho
 
 # Please provide a minimal, reproducible example
 ```

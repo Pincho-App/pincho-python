@@ -1,4 +1,4 @@
-"""Rate limit monitoring example for WirePusher.
+"""Rate limit monitoring example for Pincho.
 
 This example demonstrates how to monitor and work with API rate limits
 using the last_rate_limit property available on both sync and async clients.
@@ -14,10 +14,10 @@ import asyncio
 import os
 from datetime import datetime
 
-from wirepusher_official import AsyncWirePusher, WirePusher
+from pincho import AsyncPincho, Pincho
 
 # Get token from environment variable
-TOKEN = os.getenv("WIREPUSHER_TOKEN", "abc12345")
+TOKEN = os.getenv("PINCHO_TOKEN", "abc12345")
 
 
 def basic_rate_limit_check():
@@ -25,7 +25,7 @@ def basic_rate_limit_check():
     print("Example 1: Basic Rate Limit Check")
     print("-" * 40)
 
-    with WirePusher(token=TOKEN) as client:
+    with Pincho(token=TOKEN) as client:
         response = client.send(
             title="Rate Limit Test",
             message="Checking rate limit information",
@@ -55,7 +55,7 @@ def proactive_rate_limit_checking():
     print("Example 2: Proactive Rate Limit Checking")
     print("-" * 40)
 
-    with WirePusher(token=TOKEN) as client:
+    with Pincho(token=TOKEN) as client:
         # First request to get rate limit info
         client.send("Initial", "Getting rate limit info")
 
@@ -93,7 +93,7 @@ def rate_limit_aware_batch():
         ("Alert 5", "Fifth message"),
     ]
 
-    with WirePusher(token=TOKEN) as client:
+    with Pincho(token=TOKEN) as client:
         for i, (title, message) in enumerate(messages, 1):
             print(f"Sending message {i}/{len(messages)}...")
             client.send(title, message, type="batch")
@@ -118,7 +118,7 @@ def multiple_requests_tracking():
     print("Example 4: Track Rate Limits Across Requests")
     print("-" * 40)
 
-    with WirePusher(token=TOKEN) as client:
+    with Pincho(token=TOKEN) as client:
         # Send 3 requests and track changes
         for i in range(3):
             client.send(f"Test {i+1}", f"Message number {i+1}")
@@ -134,7 +134,7 @@ async def async_rate_limit_monitoring():
     print("Example 5: Async Rate Limit Monitoring")
     print("-" * 40)
 
-    async with AsyncWirePusher(token=TOKEN) as client:
+    async with AsyncPincho(token=TOKEN) as client:
         # Send concurrent requests
         tasks = [client.send(f"Async {i}", f"Message {i}") for i in range(3)]
 
@@ -161,7 +161,7 @@ def rate_limit_safe_sender():
 
         def __init__(self, min_remaining: int = 5):
             self.min_remaining = min_remaining
-            self.client = WirePusher(token=TOKEN)
+            self.client = Pincho(token=TOKEN)
 
         def __enter__(self):
             self.client.__enter__()
@@ -204,7 +204,7 @@ def rate_limit_safe_sender():
 def main():
     """Run all rate limit examples."""
     print("=" * 50)
-    print("WirePusher Rate Limit Monitoring Examples")
+    print("Pincho Rate Limit Monitoring Examples")
     print("=" * 50)
     print()
 

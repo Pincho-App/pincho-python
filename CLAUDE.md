@@ -1,10 +1,10 @@
-# CLAUDE.md - WirePusher Python Library
+# CLAUDE.md - Pincho Python Library
 
-Context file for AI-powered development assistance on the WirePusher Python library project.
+Context file for AI-powered development assistance on the Pincho Python library project.
 
 ## Project Overview
 
-**WirePusher Python Library** is a Python client library for sending push notifications via [WirePusher](https://wirepusher.dev).
+**Pincho Python Library** is a Python client library for sending push notifications via [Pincho](https://pincho.dev).
 
 - **Language**: Python 3.8+
 - **Framework**: httpx (HTTP client with HTTP/2 support)
@@ -14,8 +14,8 @@ Context file for AI-powered development assistance on the WirePusher Python libr
 ## Architecture
 
 ```
-wirepusher-python/
-├── src/wirepusher/          # Main library code
+pincho-python/
+├── src/pincho/          # Main library code
 │   ├── __init__.py          # Public API exports
 │   ├── client.py            # Synchronous client (wraps async)
 │   ├── async_client.py      # Asynchronous client (main implementation)
@@ -40,13 +40,13 @@ wirepusher-python/
 
 ### 1. Dual Client Architecture
 
-**AsyncWirePusher** (Primary Implementation):
+**AsyncPincho** (Primary Implementation):
 - Full async/await support with asyncio
 - Main implementation with all features
 - Context manager support (`async with`)
 
-**WirePusher** (Sync Wrapper):
-- Synchronous API wrapping AsyncWirePusher
+**Pincho** (Sync Wrapper):
+- Synchronous API wrapping AsyncPincho
 - Uses `asyncio.run()` internally
 - Same API as async client
 
@@ -115,9 +115,9 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 # Shows:
-# DEBUG:wirepusher:AsyncWirePusher initialized with token=abc12345...
-# DEBUG:wirepusher:Send attempt 1/4
-# INFO:wirepusher:Notification sent successfully: Deploy Complete
+# DEBUG:pincho:AsyncPincho initialized with token=abc12345...
+# DEBUG:pincho:Send attempt 1/4
+# INFO:pincho:Notification sent successfully: Deploy Complete
 ```
 
 Levels:
@@ -142,24 +142,24 @@ Environment variable support with constructor-based overrides:
 
 ```python
 # Auto-load from environment variables
-client = WirePusher()  # reads WIREPUSHER_TOKEN
+client = Pincho()  # reads PINCHO_TOKEN
 
 # Explicit token
-client = WirePusher(token='abc12345')
+client = Pincho(token='abc12345')
 
 # All options
-client = WirePusher(
-    token='abc12345',     # Or WIREPUSHER_TOKEN env var
-    timeout=60.0,         # Or WIREPUSHER_TIMEOUT env var (seconds), default: 30.0
-    max_retries=5,        # Or WIREPUSHER_MAX_RETRIES env var, default: 3
+client = Pincho(
+    token='abc12345',     # Or PINCHO_TOKEN env var
+    timeout=60.0,         # Or PINCHO_TIMEOUT env var (seconds), default: 30.0
+    max_retries=5,        # Or PINCHO_MAX_RETRIES env var, default: 3
     base_url='...'        # Custom base URL (for testing)
 )
 ```
 
 **Environment Variables**:
-- `WIREPUSHER_TOKEN` - API token (required if not passed to constructor)
-- `WIREPUSHER_TIMEOUT` - Request timeout in seconds (default: 30)
-- `WIREPUSHER_MAX_RETRIES` - Maximum retry attempts (default: 3)
+- `PINCHO_TOKEN` - API token (required if not passed to constructor)
+- `PINCHO_TIMEOUT` - Request timeout in seconds (default: 30)
+- `PINCHO_MAX_RETRIES` - Maximum retry attempts (default: 3)
 
 No config file support (not standard for Python libraries).
 
@@ -225,7 +225,7 @@ pip install -e ".[dev]"
 ```bash
 pytest                          # All tests
 pytest -v                       # Verbose
-pytest --cov=wirepusher         # With coverage
+pytest --cov=pincho         # With coverage
 pytest tests/test_client.py     # Specific file
 pytest -k "test_retry"          # Specific tests
 ```
@@ -233,7 +233,7 @@ pytest -k "test_retry"          # Specific tests
 ### Code Quality
 
 ```bash
-mypy src/wirepusher             # Type checking (strict mode)
+mypy src/pincho             # Type checking (strict mode)
 black src/ tests/               # Formatting
 ruff check src/ tests/          # Linting
 ```
@@ -323,9 +323,9 @@ Example: `Invalid parameters: Title is required [missing_required_field] (parame
 
 ## Notes for AI Assistants
 
-- **Simplicity is key**: Keep API as simple as the WirePusher app
+- **Simplicity is key**: Keep API as simple as the Pincho app
 - **Pythonic**: Follow PEP 8, use type hints, clear docstrings
-- **Async-first**: Implement in `AsyncWirePusher`, sync wraps async
+- **Async-first**: Implement in `AsyncPincho`, sync wraps async
 - **Zero config**: No config files (not standard for libraries)
 - **Minimal deps**: Only httpx and cryptography for runtime
 - **Logging**: Use stdlib `logging` module (not print statements)
@@ -350,11 +350,11 @@ Example: `Invalid parameters: Title is required [missing_required_field] (parame
 
 **Not Needed**:
 - ❌ Config file support (not standard for libraries)
-- ❌ CLI tool (separate wirepusher-cli project)
+- ❌ CLI tool (separate pincho-cli project)
 
 ## Links
 
-- **Repository**: https://gitlab.com/wirepusher/wirepusher-python
-- **Issues**: https://gitlab.com/wirepusher/wirepusher-python/-/issues
-- **API Docs**: https://wirepusher.dev/help
-- **App**: https://wirepusher.dev
+- **Repository**: https://gitlab.com/pincho/pincho-python
+- **Issues**: https://gitlab.com/pincho/pincho-python/-/issues
+- **API Docs**: https://pincho.dev/help
+- **App**: https://pincho.dev

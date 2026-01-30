@@ -12,11 +12,11 @@ The AI automatically generates:
 
 import os
 
-from wirepusher_official import WirePusher
-from wirepusher_official.exceptions import WirePusherError
+from pincho import Pincho
+from pincho.exceptions import PinchoError
 
 # Get token from environment variable
-TOKEN = os.getenv("WIREPUSHER_TOKEN", "abc12345")
+TOKEN = os.getenv("PINCHO_TOKEN", "abc12345")
 
 
 def main():
@@ -24,7 +24,7 @@ def main():
 
     # Example 1: Basic NotifAI usage
     print("Example 1: Basic AI-generated notification...")
-    with WirePusher(token=TOKEN) as client:
+    with Pincho(token=TOKEN) as client:
         response = client.notifai("deployment finished successfully, v2.1.3 is live on production")
 
         print(f"  Status: {response.status}")
@@ -38,7 +38,7 @@ def main():
 
     # Example 2: System monitoring alert
     print("Example 2: System monitoring alert...")
-    with WirePusher(token=TOKEN) as client:
+    with Pincho(token=TOKEN) as client:
         response = client.notifai(
             "cpu at 95% on web-3, memory usage is high, might need to restart"
         )
@@ -51,7 +51,7 @@ def main():
 
     # Example 3: Override AI-generated type
     print("Example 3: Override AI type...")
-    with WirePusher(token=TOKEN) as client:
+    with Pincho(token=TOKEN) as client:
         response = client.notifai(
             "new user signup, email: user@example.com", type="user-activity"  # Override AI type
         )
@@ -65,7 +65,7 @@ def main():
 
     # Example 4: Sales/business event
     print("Example 4: Business event...")
-    with WirePusher(token=TOKEN) as client:
+    with Pincho(token=TOKEN) as client:
         response = client.notifai("new order placed, $249.99, premium plan subscription")
 
         if response.notification:
@@ -77,10 +77,10 @@ def main():
     # Example 5: Error handling
     print("Example 5: Error handling...")
     try:
-        with WirePusher(token=TOKEN) as client:
+        with Pincho(token=TOKEN) as client:
             # Empty text should fail validation
             response = client.notifai("")
-    except WirePusherError as e:
+    except PinchoError as e:
         print(f"  Expected error: {e}\n")
 
     print("✓ All NotifAI examples completed!")

@@ -1,7 +1,7 @@
-"""Encryption utilities for WirePusher library.
+"""Encryption utilities for Pincho library.
 
 Provides AES-128-CBC encryption with custom Base64 encoding to match
-the WirePusher app's decryption implementation.
+the Pincho app's decryption implementation.
 """
 
 import base64
@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
 def custom_base64_encode(data: bytes) -> str:
-    """Encode bytes using custom Base64 encoding matching WirePusher app.
+    """Encode bytes using custom Base64 encoding matching Pincho app.
 
     Converts standard Base64 characters to custom encoding:
     - '+' → '-'
@@ -54,7 +54,7 @@ def derive_encryption_key(password: str) -> bytes:
 def encrypt_message(plaintext: str, password: str, iv: bytes) -> str:
     """Encrypt text using AES-128-CBC with custom Base64 encoding.
 
-    Encryption process matching WirePusher app:
+    Encryption process matching Pincho app:
     1. Derive key from password using SHA1
     2. Apply PKCS7 padding to plaintext
     3. Encrypt using AES-128-CBC with provided IV

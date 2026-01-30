@@ -1,4 +1,4 @@
-# Contributing to WirePusher Python Library
+# Contributing to Pincho Python Library
 
 Thanks for considering contributing! This is a small project with a small team, so every contribution makes a real difference.
 
@@ -10,8 +10,8 @@ Be respectful and constructive. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for
 
 ```bash
 # Get the code
-git clone https://gitlab.com/wirepusher/wirepusher-python.git
-cd wirepusher-python
+git clone https://gitlab.com/pincho/pincho-python.git
+cd pincho-python
 
 # Create virtual environment
 python3 -m venv venv
@@ -24,8 +24,8 @@ pip install -e ".[dev]"
 pytest -v
 
 # Make sure everything passes
-pytest -v --cov=wirepusher
-mypy src/wirepusher
+pytest -v --cov=pincho
+mypy src/pincho
 black --check src/ tests/
 ruff check src/ tests/
 ```
@@ -36,7 +36,7 @@ ruff check src/ tests/
 
 ### Report a Bug
 
-[Check existing issues](https://gitlab.com/wirepusher/wirepusher-python/-/issues) first, then create a new one with:
+[Check existing issues](https://gitlab.com/pincho/pincho-python/-/issues) first, then create a new one with:
 
 - What you did (exact code)
 - What happened vs what you expected
@@ -49,8 +49,8 @@ ruff check src/ tests/
 
 **Code:**
 ```python
-from wirepusher import WirePusher
-client = WirePusher(token='abc12345')
+from pincho import Pincho
+client = Pincho(token='abc12345')
 client.send('Title', 'Message')
 ```
 
@@ -74,8 +74,8 @@ Create an issue explaining:
 2. **Create a branch**: `git checkout -b fix-something`
 3. **Make your changes**
 4. **Add tests** for new functionality
-5. **Run tests**: `pytest -v --cov=wirepusher`
-6. **Format**: `black src/ tests/ && mypy src/wirepusher && ruff check src/ tests/`
+5. **Run tests**: `pytest -v --cov=pincho`
+6. **Format**: `black src/ tests/ && mypy src/pincho && ruff check src/ tests/`
 7. **Commit** with a clear message
 8. **Push** to your fork
 9. **Open a Merge Request**
@@ -105,7 +105,7 @@ changes
 ## Project Structure
 
 ```
-src/wirepusher/   # Library code (client, async_client, models, exceptions, validation, crypto)
+src/pincho/   # Library code (client, async_client, models, exceptions, validation, crypto)
 tests/            # Test suite (pytest)
 examples/         # Usage examples
 docs/             # Documentation
@@ -126,7 +126,7 @@ See [CLAUDE.md](CLAUDE.md) for details.
 ```bash
 pytest                          # All tests
 pytest -v                       # Verbose
-pytest --cov=wirepusher         # With coverage
+pytest --cov=pincho         # With coverage
 pytest tests/test_client.py -v  # Specific file
 pytest -k "test_retry"          # Specific tests
 ```
@@ -135,7 +135,7 @@ pytest -k "test_retry"          # Specific tests
 
 ```bash
 # Type checking
-mypy src/wirepusher
+mypy src/pincho
 
 # Formatting (auto-fix)
 black src/ tests/
@@ -144,7 +144,7 @@ black src/ tests/
 ruff check src/ tests/
 
 # All checks
-pytest --cov=wirepusher && mypy src/wirepusher && black --check src/ tests/ && ruff check src/ tests/
+pytest --cov=pincho && mypy src/pincho && black --check src/ tests/ && ruff check src/ tests/
 ```
 
 ## Need Help?

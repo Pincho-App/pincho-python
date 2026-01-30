@@ -1,6 +1,6 @@
 # Advanced Usage Guide
 
-This document covers advanced configuration options and usage patterns for the WirePusher Python library.
+This document covers advanced configuration options and usage patterns for the Pincho Python library.
 
 ## Table of Contents
 
@@ -17,9 +17,9 @@ The library automatically tracks rate limit information from API responses. Afte
 ### Basic Rate Limit Checking
 
 ```python
-from wirepusher_official import WirePusher
+from pincho import Pincho
 
-with WirePusher() as client:
+with Pincho() as client:
     response = client.send('Alert', 'Server restarted')
 
     # Check rate limit status
@@ -44,7 +44,7 @@ The `last_rate_limit` property contains a `RateLimitInfo` object with:
 ```python
 from datetime import datetime
 
-with WirePusher() as client:
+with Pincho() as client:
     client.send('Test', 'Message')
 
     if client.last_rate_limit:
@@ -58,7 +58,7 @@ with WirePusher() as client:
 ```python
 def send_batch_with_awareness(messages: list):
     """Send multiple messages with rate limit awareness."""
-    with WirePusher() as client:
+    with Pincho() as client:
         for title, message in messages:
             response = client.send(title, message)
 
@@ -83,7 +83,7 @@ When you hit a rate limit (429 response), the library will:
 
 ```python
 # Rate limits are handled automatically
-with WirePusher(max_retries=3) as client:
+with Pincho(max_retries=3) as client:
     # Even if rate limited, this will retry automatically
     response = client.send('Important', 'Message')
 ```
@@ -99,12 +99,12 @@ with WirePusher(max_retries=3) as client:
 
 ```python
 # Disable automatic retries
-client = WirePusher(max_retries=0)
+client = Pincho(max_retries=0)
 ```
 
 ## Logging Configuration
 
-The library uses Python's standard `logging` module with the logger name `wirepusher_official`.
+The library uses Python's standard `logging` module with the logger name `pincho`.
 
 ### Enable Debug Logging
 
@@ -117,8 +117,8 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# Or configure just wirepusher logger
-logger = logging.getLogger('wirepusher_official')
+# Or configure just pincho logger
+logger = logging.getLogger('pincho')
 logger.setLevel(logging.DEBUG)
 ```
 
@@ -132,10 +132,10 @@ logger.setLevel(logging.DEBUG)
 ### Example Log Output
 
 ```
-DEBUG:wirepusher_official:AsyncWirePusher initialized with token=abc12345..., timeout=30.0, max_retries=3
-DEBUG:wirepusher_official:Send attempt 1/4
-DEBUG:wirepusher_official:Rate limit info: 95/100 remaining, resets at 2025-11-16 10:00:00
-INFO:wirepusher_official:Notification sent successfully: Build Complete
+DEBUG:pincho:AsyncPincho initialized with token=abc12345..., timeout=30.0, max_retries=3
+DEBUG:pincho:Send attempt 1/4
+DEBUG:pincho:Rate limit info: 95/100 remaining, resets at 2025-11-16 10:00:00
+INFO:pincho:Notification sent successfully: Build Complete
 ```
 
 ### Custom Log Handler
@@ -144,19 +144,19 @@ INFO:wirepusher_official:Notification sent successfully: Build Complete
 import logging
 
 # Create custom handler
-handler = logging.FileHandler('wirepusher.log')
+handler = logging.FileHandler('pincho.log')
 handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 
-# Add to wirepusher logger
-logger = logging.getLogger('wirepusher_official')
+# Add to pincho logger
+logger = logging.getLogger('pincho')
 logger.addHandler(handler)
 ```
 
 ## Async vs Sync Clients
 
-### Sync Client (WirePusher)
+### Sync Client (Pincho)
 
 Best for:
 - Simple scripts
@@ -165,21 +165,21 @@ Best for:
 - When async isn't needed
 
 ```python
-from wirepusher_official import WirePusher
+from pincho import Pincho
 
 # Context manager (recommended)
-with WirePusher() as client:
+with Pincho() as client:
     client.send('Title', 'Message')
 
 # Manual cleanup
-client = WirePusher()
+client = Pincho()
 try:
     client.send('Title', 'Message')
 finally:
     client.close()
 ```
 
-### Async Client (AsyncWirePusher)
+### Async Client (AsyncPincho)
 
 Best for:
 - High-throughput applications
@@ -189,10 +189,10 @@ Best for:
 
 ```python
 import asyncio
-from wirepusher_official import AsyncWirePusher
+from pincho import AsyncPincho
 
 async def main():
-    async with AsyncWirePusher() as client:
+    async with AsyncPincho() as client:
         # Single notification
         await client.send('Title', 'Message')
 
@@ -213,7 +213,7 @@ import time
 import asyncio
 
 # Sync: Sequential (slower)
-with WirePusher() as client:
+with Pincho() as client:
     start = time.time()
     for i in range(10):
         client.send(f'Alert {i}', f'Message {i}')
@@ -221,7 +221,7 @@ with WirePusher() as client:
 
 # Async: Concurrent (faster)
 async def async_send():
-    async with AsyncWirePusher() as client:
+    async with AsyncPincho() as client:
         start = time.time()
         tasks = [client.send(f'Alert {i}', f'Message {i}') for i in range(10)]
         await asyncio.gather(*tasks)
@@ -237,14 +237,14 @@ asyncio.run(async_send())
 Set defaults via environment variables:
 
 ```bash
-export WIREPUSHER_TOKEN="your_token_here"
-export WIREPUSHER_TIMEOUT="60"
-export WIREPUSHER_MAX_RETRIES="5"
+export PINCHO_TOKEN="your_token_here"
+export PINCHO_TIMEOUT="60"
+export PINCHO_MAX_RETRIES="5"
 ```
 
 ```python
 # Automatically picks up env vars
-client = WirePusher()
+client = Pincho()
 ```
 
 ### Constructor Overrides
@@ -252,8 +252,8 @@ client = WirePusher()
 Explicit configuration takes precedence:
 
 ```python
-client = WirePusher(
-    token='abc12345',      # Override WIREPUSHER_TOKEN
+client = Pincho(
+    token='abc12345',      # Override PINCHO_TOKEN
     timeout=120.0,         # Request timeout (seconds)
     max_retries=10,        # Retry attempts (0 to disable)
 )
@@ -263,7 +263,7 @@ client = WirePusher(
 
 ```python
 # For testing against mock server
-client = WirePusher(
+client = Pincho(
     token='test_token',
     base_url='http://localhost:8080'
 )
@@ -277,8 +277,8 @@ client = WirePusher(
 
 Example:
 ```python
-# If WIREPUSHER_TIMEOUT=30 in environment
-client = WirePusher(timeout=60)  # Uses 60, not 30
+# If PINCHO_TIMEOUT=30 in environment
+client = Pincho(timeout=60)  # Uses 60, not 30
 ```
 
 ## Error Handling Patterns
@@ -286,8 +286,8 @@ client = WirePusher(timeout=60)  # Uses 60, not 30
 ### Distinguishing Error Types
 
 ```python
-from wirepusher_official import (
-    WirePusher,
+from pincho import (
+    Pincho,
     AuthenticationError,
     ValidationError,
     RateLimitError,
@@ -296,7 +296,7 @@ from wirepusher_official import (
 )
 
 try:
-    with WirePusher() as client:
+    with Pincho() as client:
         client.send('Alert', 'Message')
 except AuthenticationError as e:
     # Invalid or revoked token
@@ -323,11 +323,11 @@ except NetworkError as e:
 ### Checking Retryability
 
 ```python
-from wirepusher_official.exceptions import WirePusherError
+from pincho.exceptions import PinchoError
 
 try:
     client.send('Title', 'Message')
-except WirePusherError as e:
+except PinchoError as e:
     if e.is_retryable:
         print("Error is retryable, consider waiting and retrying manually")
     else:
@@ -340,12 +340,12 @@ except WirePusherError as e:
 
 ```python
 from fastapi import FastAPI, BackgroundTasks
-from wirepusher_official import AsyncWirePusher
+from pincho import AsyncPincho
 
 app = FastAPI()
 
 async def send_notification(title: str, message: str):
-    async with AsyncWirePusher() as client:
+    async with AsyncPincho() as client:
         await client.send(title, message)
 
 @app.post("/deploy")
@@ -363,7 +363,7 @@ async def deploy(background_tasks: BackgroundTasks):
 
 ```python
 from flask import Flask, request
-from wirepusher_official import WirePusher
+from pincho import Pincho
 
 app = Flask(__name__)
 
@@ -371,7 +371,7 @@ app = Flask(__name__)
 def handle_webhook():
     data = request.json
 
-    with WirePusher() as client:
+    with Pincho() as client:
         client.send(
             title=f"Webhook: {data['event']}",
             message=data['message'],
@@ -385,13 +385,13 @@ def handle_webhook():
 
 ```python
 from celery import Celery
-from wirepusher_official import WirePusher
+from pincho import Pincho
 
 app = Celery('tasks')
 
 @app.task
 def send_notification_task(title: str, message: str, **kwargs):
-    with WirePusher() as client:
+    with Pincho() as client:
         return client.send(title, message, **kwargs)
 ```
 

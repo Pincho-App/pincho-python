@@ -3,13 +3,13 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "wirepusher_official"
+name = "pincho"
 version = "1.0.0-alpha.6"
-description = "Official WirePusher client library for Python"
+description = "Official Pincho client library for Python"
 readme = "README.md"
 license = "MIT"
 authors = [
-    {name = "WirePusher", email = "support@wirepusher.com"}
+    {name = "Pincho", email = "support@pincho.app"}
 ]
 requires-python = ">=3.9"
 classifiers = [
@@ -41,10 +41,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://gitlab.com/wirepusher/wirepusher-python"
-Documentation = "https://gitlab.com/wirepusher/wirepusher-python/-/blob/main/README.md"
-Repository = "https://gitlab.com/wirepusher/wirepusher-python"
-Issues = "https://gitlab.com/wirepusher/wirepusher-python/-/issues"
+Homepage = "https://gitlab.com/pincho-app/pincho-python"
+Documentation = "https://gitlab.com/pincho-app/pincho-python/-/blob/main/README.md"
+Repository = "https://gitlab.com/pincho-app/pincho-python"
+Issues = "https://gitlab.com/pincho-app/pincho-python/-/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -56,7 +56,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "--verbose",
-    "--cov=wirepusher_official",
+    "--cov=pincho",
     "--cov-report=term-missing",
     "--cov-report=html",
 ]

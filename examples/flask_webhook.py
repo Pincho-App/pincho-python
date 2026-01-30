@@ -1,13 +1,13 @@
-"""Flask webhook example for WirePusher.
+"""Flask webhook example for Pincho.
 
 This example demonstrates how to send notifications from a Flask web application
 in response to webhook events (deployments, alerts, CI/CD events, etc.).
 
 Requirements:
-    pip install flask wirepusher_official
+    pip install flask pincho
 
 Usage:
-    1. Set your token: export WIREPUSHER_TOKEN="your_token"
+    1. Set your token: export PINCHO_TOKEN="your_token"
     2. Run: python3 flask_webhook.py
     3. Test with:
        curl -X POST http://localhost:5000/webhook \
@@ -20,8 +20,8 @@ from threading import Thread
 
 from flask import Flask, jsonify, request
 
-from wirepusher_official import WirePusher
-from wirepusher_official.exceptions import WirePusherError
+from pincho import Pincho
+from pincho.exceptions import PinchoError
 
 app = Flask(__name__)
 
@@ -31,9 +31,9 @@ def send_notification_async(title: str, message: str, **kwargs):
 
     def _send():
         try:
-            with WirePusher() as client:
+            with Pincho() as client:
                 client.send(title, message, **kwargs)
-        except WirePusherError as e:
+        except PinchoError as e:
             # Log error but don't fail the webhook
             app.logger.error(f"Failed to send notification: {e}")
 
@@ -140,17 +140,17 @@ def handle_alert():
 def health_check():
     """Health check endpoint."""
     # Verify token is configured
-    if not os.getenv("WIREPUSHER_TOKEN"):
-        return jsonify({"status": "unhealthy", "error": "WIREPUSHER_TOKEN not set"}), 500
+    if not os.getenv("PINCHO_TOKEN"):
+        return jsonify({"status": "unhealthy", "error": "PINCHO_TOKEN not set"}), 500
 
     return jsonify({"status": "healthy"})
 
 
 if __name__ == "__main__":
     # Verify token is set
-    if not os.getenv("WIREPUSHER_TOKEN"):
-        print("Error: WIREPUSHER_TOKEN environment variable not set")
-        print("Set it with: export WIREPUSHER_TOKEN='your_token'")
+    if not os.getenv("PINCHO_TOKEN"):
+        print("Error: PINCHO_TOKEN environment variable not set")
+        print("Set it with: export PINCHO_TOKEN='your_token'")
         exit(1)
 
     print("Starting Flask webhook server...")

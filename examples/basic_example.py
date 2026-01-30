@@ -1,21 +1,21 @@
-"""Basic example of using WirePusher library."""
+"""Basic example of using Pincho library."""
 
 import os
 
-from wirepusher_official import WirePusher
+from pincho import Pincho
 
 # Get token from environment variable
-TOKEN = os.getenv("WIREPUSHER_TOKEN", "abc12345")
+TOKEN = os.getenv("PINCHO_TOKEN", "abc12345")
 
 
 def main():
-    """Send a basic notification using WirePusher."""
+    """Send a basic notification using Pincho."""
     # Using context manager (recommended)
-    with WirePusher(token=TOKEN) as client:
+    with Pincho(token=TOKEN) as client:
         # Simple notification
         response = client.send(
             title="Hello from Python!",
-            message="This is a test notification from the WirePusher Python library.",
+            message="This is a test notification from the Pincho Python library.",
         )
 
         print(f"Status: {response.status}")
@@ -28,7 +28,7 @@ def main():
             type="demo",
             tags=["python-sdk", "example", "advanced"],
             image_url="https://picsum.photos/400/300",
-            action_url="https://github.com/wirepusher/python-sdk",
+            action_url="https://github.com/pincho/python-sdk",
         )
 
         print(f"\nAdvanced notification status: {response.status}")

@@ -1,24 +1,24 @@
-# WirePusher Python Library
+# Pincho Python Library
 
-Official Python client for [WirePusher](https://wirepusher.dev) push notifications.
+Official Python client for [Pincho](https://pincho.dev) push notifications.
 
 ## Installation
 
 ```bash
-pip install wirepusher_official
+pip install pincho
 ```
 
 ## Quick Start
 
 ```python
-from wirepusher_official import WirePusher
+from pincho import Pincho
 
-# Auto-load token from WIREPUSHER_TOKEN env var
-with WirePusher() as client:
+# Auto-load token from PINCHO_TOKEN env var
+with Pincho() as client:
     client.send('Deploy Complete', 'Version 1.2.3 deployed')
 
 # Or provide token explicitly
-with WirePusher(token='YOUR_TOKEN') as client:
+with Pincho(token='YOUR_TOKEN') as client:
     client.send('Alert', 'Server CPU at 95%')
 ```
 
@@ -48,9 +48,9 @@ client.send(
 )
 
 # Async support
-from wirepusher_official import AsyncWirePusher
+from pincho import AsyncPincho
 
-async with AsyncWirePusher() as client:
+async with AsyncPincho() as client:
     await client.send('Test', 'Message')
 ```
 
@@ -58,12 +58,12 @@ async with AsyncWirePusher() as client:
 
 ```python
 # Environment variables (recommended)
-# WIREPUSHER_TOKEN - API token (required if not passed to constructor)
-# WIREPUSHER_TIMEOUT - Request timeout in seconds (default: 30)
-# WIREPUSHER_MAX_RETRIES - Retry attempts (default: 3)
+# PINCHO_TOKEN - API token (required if not passed to constructor)
+# PINCHO_TIMEOUT - Request timeout in seconds (default: 30)
+# PINCHO_MAX_RETRIES - Retry attempts (default: 3)
 
 # Or explicit configuration
-client = WirePusher(
+client = Pincho(
     token='abc12345',
     timeout=60.0,
     max_retries=5
@@ -73,15 +73,15 @@ client = WirePusher(
 ## Error Handling
 
 ```python
-from wirepusher_official import (
-    WirePusher,
+from pincho import (
+    Pincho,
     AuthenticationError,
     ValidationError,
     RateLimitError
 )
 
 try:
-    with WirePusher() as client:
+    with Pincho() as client:
         client.send('Title', 'Message')
 except AuthenticationError:
     print("Invalid token")
@@ -98,7 +98,7 @@ Automatic retry with exponential backoff for network errors, 5xx, and 429 (rate 
 The library automatically handles rate limits with Retry-After header support:
 
 ```python
-with WirePusher() as client:
+with Pincho() as client:
     client.send('Alert', 'Message')
 
     # Check rate limit status after any request
@@ -112,9 +112,9 @@ See [Advanced Documentation](docs/ADVANCED.md) for detailed rate limit monitorin
 ## Links
 
 - **Get Token**: App → Settings → Help → copy token
-- **Documentation**: https://wirepusher.dev/help
-- **Repository**: https://gitlab.com/wirepusher/wirepusher-python
-- **PyPI**: https://pypi.org/project/wirepusher_official/
+- **Documentation**: https://pincho.dev/help
+- **Repository**: https://gitlab.com/pincho/pincho-python
+- **PyPI**: https://pypi.org/project/pincho/
 
 ## License
 

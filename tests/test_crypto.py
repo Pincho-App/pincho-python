@@ -2,7 +2,7 @@
 
 import os
 
-from wirepusher_official.crypto import (
+from pincho.crypto import (
     custom_base64_encode,
     derive_encryption_key,
     encrypt_message,
@@ -47,7 +47,7 @@ class TestCustomBase64Encode:
 
     def test_roundtrip_compatibility(self) -> None:
         """Test that encoding is reversible with proper decoding."""
-        original = b"Hello, WirePusher!"
+        original = b"Hello, Pincho!"
         encoded = custom_base64_encode(original)
 
         # Reverse the custom encoding to get standard Base64

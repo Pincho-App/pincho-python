@@ -60,14 +60,14 @@ If upgrading from v1.0.0:
 **Before (v1.0.0):**
 ```python
 # Old: device_id or user_id parameter
-client = WirePusher(user_id='user_abc123')
-client = WirePusher(device_id='device_abc123')  # deprecated
+client = Pincho(user_id='user_abc123')
+client = Pincho(device_id='device_abc123')  # deprecated
 ```
 
 **After (v2.0.0):**
 ```python
 # New: token-only authentication
-client = WirePusher(token='abc12345')
+client = Pincho(token='abc12345')
 ```
 
 **New features available:**
@@ -76,7 +76,7 @@ client = WirePusher(token='abc12345')
 response = client.notifai('deployment finished, v2.1.3 is live')
 
 # Configurable retries
-client = WirePusher(token='abc12345', max_retries=5)
+client = Pincho(token='abc12345', max_retries=5)
 
 # Debug logging
 import logging
@@ -86,13 +86,13 @@ logging.basicConfig(level=logging.DEBUG)
 ## [1.0.0] - 2025-10-26
 
 ### Added
-- Initial release of WirePusher Python library
-- Synchronous client (`WirePusher`) with context manager support
-- Asynchronous client (`AsyncWirePusher`) with asyncio support
+- Initial release of Pincho Python library
+- Synchronous client (`Pincho`) with context manager support
+- Asynchronous client (`AsyncPincho`) with asyncio support
 - httpx-based HTTP client with HTTP/2 support
 - Full type hints and py.typed marker for IDE support
 - Custom exceptions for better error handling:
-  - `WirePusherError` - Base exception
+  - `PinchoError` - Base exception
   - `AuthenticationError` - Auth failures (401, 403)
   - `ValidationError` - Invalid parameters (400, 404)
 - Comprehensive test suite (31 tests, 94% coverage)
@@ -114,5 +114,5 @@ logging.basicConfig(level=logging.DEBUG)
 ### Dependencies
 - httpx >= 0.24.0 (only runtime dependency)
 
-[Unreleased]: https://gitlab.com/wirepusher/python-sdk/-/compare/v1.0.0...main
-[1.0.0]: https://gitlab.com/wirepusher/python-sdk/-/tags/v1.0.0
+[Unreleased]: https://gitlab.com/pincho/python-sdk/-/compare/v1.0.0...main
+[1.0.0]: https://gitlab.com/pincho/python-sdk/-/tags/v1.0.0

@@ -1,4 +1,4 @@
-"""Data models for WirePusher library."""
+"""Data models for Pincho library."""
 
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -41,7 +41,7 @@ class NotificationRequest:
 
 @dataclass
 class NotificationResponse:
-    """Notification response model from WirePusher API.
+    """Notification response model from Pincho API.
 
     Args:
         status: Response status (typically "success" or "error")
@@ -78,7 +78,7 @@ class NotifAIRequest:
 
 @dataclass
 class NotifAIResponse:
-    """NotifAI response model from WirePusher API.
+    """NotifAI response model from Pincho API.
 
     Args:
         status: Response status (typically "success" or "error")

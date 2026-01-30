@@ -1,1 +1,1 @@
-"""Tests for WirePusher Python library."""
+"""Tests for Pincho Python library."""

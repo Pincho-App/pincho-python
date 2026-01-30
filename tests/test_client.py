@@ -1,42 +1,42 @@
-"""Tests for synchronous WirePusher client."""
+"""Tests for synchronous Pincho client."""
 
 import httpx
 import pytest
 from pytest_httpx import HTTPXMock
 
-from wirepusher_official import WirePusher
-from wirepusher_official.exceptions import (
+from pincho import Pincho
+from pincho.exceptions import (
     AuthenticationError,
+    PinchoError,
     ValidationError,
-    WirePusherError,
 )
 
 
-class TestWirePusher:
-    """Test suite for WirePusher synchronous client."""
+class TestPincho:
+    """Test suite for Pincho synchronous client."""
 
     def test_init(self) -> None:
         """Test client initialization with token."""
-        client = WirePusher(token="abc12345")
+        client = Pincho(token="abc12345")
         assert client._async_client.token == "abc12345"
         assert client._async_client.timeout == 30.0
-        assert client._async_client.base_url == "https://api.wirepusher.dev"
+        assert client._async_client.base_url == "https://api.pincho.dev"
         client.close()
 
     def test_init_missing_token_raises_error(self) -> None:
         """Test that missing token raises ValueError."""
         with pytest.raises(ValueError, match="Token is required"):
-            WirePusher(token="")
+            Pincho(token="")
 
     def test_init_custom_timeout(self) -> None:
         """Test client initialization with custom timeout."""
-        client = WirePusher(token="abc12345", timeout=60.0)
+        client = Pincho(token="abc12345", timeout=60.0)
         assert client._async_client.timeout == 60.0
         client.close()
 
     def test_init_custom_base_url(self) -> None:
         """Test client initialization with custom base URL."""
-        client = WirePusher(
+        client = Pincho(
             token="abc12345",
             base_url="https://custom.example.com",
         )
@@ -45,7 +45,7 @@ class TestWirePusher:
 
     def test_context_manager(self) -> None:
         """Test client as context manager."""
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             assert client._async_client.token == "abc12345"
         # Client should be closed after exiting context
 
@@ -53,12 +53,12 @@ class TestWirePusher:
         """Test successful notification send."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/send",
+            url="https://api.pincho.dev/send",
             json={"status": "success", "message": "Notification sent successfully"},
             status_code=200,
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             response = client.send("Test Title", "Test message")
             assert response.status == "success"
             assert response.message == "Notification sent successfully"
@@ -67,12 +67,12 @@ class TestWirePusher:
         """Test send with all optional parameters."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/send",
+            url="https://api.pincho.dev/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             response = client.send(
                 "Test Title",
                 "Test message",
@@ -100,7 +100,7 @@ class TestWirePusher:
         """Test 401 authentication error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/send",
+            url="https://api.pincho.dev/send",
             json={
                 "status": "error",
                 "error": {
@@ -112,7 +112,7 @@ class TestWirePusher:
             status_code=401,
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             with pytest.raises(AuthenticationError) as exc_info:
                 client.send("Test Title", "Test message")
             assert "Invalid token" in str(exc_info.value)
@@ -122,7 +122,7 @@ class TestWirePusher:
         """Test 400 validation error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/send",
+            url="https://api.pincho.dev/send",
             json={
                 "status": "error",
                 "error": {
@@ -135,7 +135,7 @@ class TestWirePusher:
             status_code=400,
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             with pytest.raises(ValidationError) as exc_info:
                 client.send("", "Test message")
             assert "Invalid parameters" in str(exc_info.value)
@@ -147,7 +147,7 @@ class TestWirePusher:
         """Test 403 forbidden error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/send",
+            url="https://api.pincho.dev/send",
             json={
                 "status": "error",
                 "error": {
@@ -159,7 +159,7 @@ class TestWirePusher:
             status_code=403,
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             with pytest.raises(AuthenticationError) as exc_info:
                 client.send("Test Title", "Test message")
             assert "Forbidden" in str(exc_info.value)
@@ -169,7 +169,7 @@ class TestWirePusher:
         """Test 404 not found error with nested error format."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/send",
+            url="https://api.pincho.dev/send",
             json={
                 "status": "error",
                 "error": {
@@ -181,7 +181,7 @@ class TestWirePusher:
             status_code=404,
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             with pytest.raises(ValidationError) as exc_info:
                 client.send("Test Title", "Test message")
             assert "User not found" in str(exc_info.value)
@@ -193,7 +193,7 @@ class TestWirePusher:
         for _ in range(4):
             httpx_mock.add_response(
                 method="POST",
-                url="https://api.wirepusher.dev/send",
+                url="https://api.pincho.dev/send",
                 json={
                     "status": "error",
                     "error": {
@@ -205,8 +205,8 @@ class TestWirePusher:
                 status_code=500,
             )
 
-        with WirePusher(token="abc12345") as client:
-            with pytest.raises(WirePusherError) as exc_info:
+        with Pincho(token="abc12345") as client:
+            with pytest.raises(PinchoError) as exc_info:
                 client.send("Test Title", "Test message")
             assert "Server error (500)" in str(exc_info.value)
             assert "[internal_error]" in str(exc_info.value)
@@ -217,8 +217,8 @@ class TestWirePusher:
         for _ in range(4):
             httpx_mock.add_exception(httpx.ConnectError("Connection failed"))
 
-        with WirePusher(token="abc12345") as client:
-            with pytest.raises(WirePusherError) as exc_info:
+        with Pincho(token="abc12345") as client:
+            with pytest.raises(PinchoError) as exc_info:
                 client.send("Test Title", "Test message")
             assert "Network error" in str(exc_info.value)
 
@@ -228,8 +228,8 @@ class TestWirePusher:
         for _ in range(4):
             httpx_mock.add_exception(httpx.TimeoutException("Request timed out"))
 
-        with WirePusher(token="abc12345", timeout=1.0) as client:
-            with pytest.raises(WirePusherError) as exc_info:
+        with Pincho(token="abc12345", timeout=1.0) as client:
+            with pytest.raises(PinchoError) as exc_info:
                 client.send("Test Title", "Test message")
             assert "Network error" in str(exc_info.value)
 
@@ -237,13 +237,13 @@ class TestWirePusher:
         """Test handling of malformed JSON response."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/send",
+            url="https://api.pincho.dev/send",
             content=b"not json",
             status_code=200,
         )
 
-        with WirePusher(token="abc12345") as client:
-            with pytest.raises(WirePusherError) as exc_info:
+        with Pincho(token="abc12345") as client:
+            with pytest.raises(PinchoError) as exc_info:
                 client.send("Test Title", "Test message")
             assert "Unexpected error" in str(exc_info.value)
 
@@ -251,12 +251,12 @@ class TestWirePusher:
         """Test handling of response with missing fields."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/send",
+            url="https://api.pincho.dev/send",
             json={},
             status_code=200,
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             response = client.send("Test Title", "Test message")
             assert response.status == "unknown"
             assert response.message == ""
@@ -269,7 +269,7 @@ class TestWirePusher:
 
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/send",
+            url="https://api.pincho.dev/send",
             json={"status": "success", "message": "Notification sent"},
             status_code=200,
             headers={
@@ -279,7 +279,7 @@ class TestWirePusher:
             },
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             client.send("Test", "Message")
 
             # Access rate limit info through sync wrapper
@@ -292,7 +292,7 @@ class TestWirePusher:
         """Test successful NotifAI call through sync client."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/notifai",
+            url="https://api.pincho.dev/notifai",
             json={
                 "status": "success",
                 "message": "Notification generated",
@@ -305,7 +305,7 @@ class TestWirePusher:
             status_code=200,
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             response = client.notifai("deployment finished, v2.1.3 is live")
             assert response.status == "success"
             assert response.notification is not None
@@ -315,7 +315,7 @@ class TestWirePusher:
         """Test NotifAI validation error through sync client."""
         httpx_mock.add_response(
             method="POST",
-            url="https://api.wirepusher.dev/notifai",
+            url="https://api.pincho.dev/notifai",
             json={
                 "status": "error",
                 "error": {
@@ -328,7 +328,7 @@ class TestWirePusher:
             status_code=400,
         )
 
-        with WirePusher(token="abc12345") as client:
+        with Pincho(token="abc12345") as client:
             with pytest.raises(ValidationError) as exc_info:
                 client.notifai("hi")
             assert "text_too_short" in str(exc_info.value)

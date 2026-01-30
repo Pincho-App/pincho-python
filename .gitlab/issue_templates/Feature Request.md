@@ -16,7 +16,7 @@ Example: I'm always frustrated when [...] -->
 <!-- Show how you envision using this feature -->
 
 ```python
-from wirepusher import WirePusher
+from pincho import Pincho
 
 # Example of proposed API usage
 ```
@@ -31,7 +31,7 @@ from wirepusher import WirePusher
 
 ## Benefits
 
-<!-- How would this feature benefit WirePusher library users? -->
+<!-- How would this feature benefit Pincho library users? -->
 
 - Benefit 1
 - Benefit 2

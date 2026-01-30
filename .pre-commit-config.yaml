@@ -1,4 +1,4 @@
-# Pre-commit hooks for WirePusher Python library
+# Pre-commit hooks for Pincho Python library
 # See https://pre-commit.com for more information
 
 repos:
@@ -27,7 +27,7 @@ repos:
           - pytest-httpx>=0.22.0
           - httpx>=0.24.0
           - cryptography>=41.0.0
-        files: ^src/wirepusher_official/
+        files: ^src/pincho/
 
   # General pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks

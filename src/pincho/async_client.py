@@ -1,4 +1,4 @@
-"""Asynchronous WirePusher client."""
+"""Asynchronous Pincho client."""
 
 import asyncio
 import logging
@@ -8,30 +8,30 @@ from typing import List, Optional
 
 import httpx
 
-from wirepusher_official import __version__
-from wirepusher_official.crypto import encrypt_message, generate_iv
-from wirepusher_official.exceptions import (
+from pincho import __version__
+from pincho.crypto import encrypt_message, generate_iv
+from pincho.exceptions import (
     AuthenticationError,
     NetworkError,
+    PinchoError,
     RateLimitError,
     ServerError,
     ValidationError,
-    WirePusherError,
 )
-from wirepusher_official.models import (
+from pincho.models import (
     NotifAIRequest,
     NotifAIResponse,
     NotificationRequest,
     NotificationResponse,
     RateLimitInfo,
 )
-from wirepusher_official.validation import normalize_tags
+from pincho.validation import normalize_tags
 
-logger = logging.getLogger("wirepusher_official")
+logger = logging.getLogger("pincho")
 
 
-class AsyncWirePusher:
-    """Asynchronous WirePusher client for v1 API.
+class AsyncPincho:
+    """Asynchronous Pincho client for v1 API.
 
     This client provides async/await support for sending notifications and
     AI-powered notification generation.
@@ -46,12 +46,12 @@ class AsyncWirePusher:
     Example:
         >>> import asyncio
         >>> async def main():
-        ...     async with AsyncWirePusher(token='abc12345') as client:
+        ...     async with AsyncPincho(token='abc12345') as client:
         ...         await client.send('Build Complete', 'Deployed successfully')
         >>> asyncio.run(main())
     """
 
-    BASE_URL = "https://api.wirepusher.dev"
+    BASE_URL = "https://api.pincho.dev"
     DEFAULT_TIMEOUT = 30.0
     DEFAULT_MAX_RETRIES = 3
     MAX_BACKOFF = 30.0  # Maximum retry delay in seconds
@@ -63,53 +63,53 @@ class AsyncWirePusher:
         max_retries: Optional[int] = None,
         base_url: Optional[str] = None,
     ):
-        """Initialize async WirePusher client.
+        """Initialize async Pincho client.
 
         Args:
-            token: WirePusher API token. If not provided, reads from WIREPUSHER_TOKEN env var.
-            timeout: Request timeout in seconds. If not provided, reads from WIREPUSHER_TIMEOUT
+            token: Pincho API token. If not provided, reads from PINCHO_TOKEN env var.
+            timeout: Request timeout in seconds. If not provided, reads from PINCHO_TIMEOUT
                     env var or defaults to 30.0.
             max_retries: Maximum number of retry attempts. If not provided, reads from
-                        WIREPUSHER_MAX_RETRIES env var or defaults to 3. Set to 0 to disable.
+                        PINCHO_MAX_RETRIES env var or defaults to 3. Set to 0 to disable.
             base_url: Optional custom base URL (mainly for testing)
 
         Raises:
-            ValueError: If token is not provided and WIREPUSHER_TOKEN env var is not set
+            ValueError: If token is not provided and PINCHO_TOKEN env var is not set
 
         Examples:
             >>> # Auto-load from environment variables
-            >>> client = AsyncWirePusher()  # reads WIREPUSHER_TOKEN
+            >>> client = AsyncPincho()  # reads PINCHO_TOKEN
 
             >>> # Explicit token
-            >>> client = AsyncWirePusher(token='abc12345')
+            >>> client = AsyncPincho(token='abc12345')
 
             >>> # With custom settings
-            >>> client = AsyncWirePusher(
+            >>> client = AsyncPincho(
             ...     token='abc12345',
             ...     timeout=60.0,
             ...     max_retries=5
             ... )
         """
         # Load from environment variables with fallbacks
-        resolved_token = token or os.environ.get("WIREPUSHER_TOKEN")
+        resolved_token = token or os.environ.get("PINCHO_TOKEN")
         if not resolved_token:
             raise ValueError(
                 "Token is required. Provide token parameter or set "
-                "WIREPUSHER_TOKEN environment variable."
+                "PINCHO_TOKEN environment variable."
             )
 
         # Parse timeout from env var if not provided
         if timeout is not None:
             resolved_timeout = timeout
         else:
-            env_timeout = os.environ.get("WIREPUSHER_TIMEOUT")
+            env_timeout = os.environ.get("PINCHO_TIMEOUT")
             resolved_timeout = float(env_timeout) if env_timeout else self.DEFAULT_TIMEOUT
 
         # Parse max_retries from env var if not provided
         if max_retries is not None:
             resolved_max_retries = max_retries
         else:
-            env_retries = os.environ.get("WIREPUSHER_MAX_RETRIES")
+            env_retries = os.environ.get("PINCHO_MAX_RETRIES")
             resolved_max_retries = int(env_retries) if env_retries else self.DEFAULT_MAX_RETRIES
 
         self.token = resolved_token
@@ -118,18 +118,18 @@ class AsyncWirePusher:
         self.base_url = base_url or self.BASE_URL
         self._client = httpx.AsyncClient(
             timeout=resolved_timeout,
-            headers={"User-Agent": f"wirepusher-python/{__version__}"},
+            headers={"User-Agent": f"pincho-python/{__version__}"},
         )
         self.last_rate_limit: Optional[RateLimitInfo] = None
 
         logger.debug(
-            "AsyncWirePusher initialized with token=%s, timeout=%s, max_retries=%s",
+            "AsyncPincho initialized with token=%s, timeout=%s, max_retries=%s",
             resolved_token[:8] + "..." if len(resolved_token) > 8 else resolved_token,
             resolved_timeout,
             resolved_max_retries,
         )
 
-    async def __aenter__(self) -> "AsyncWirePusher":
+    async def __aenter__(self) -> "AsyncPincho":
         """Async context manager entry."""
         return self
 
@@ -140,7 +140,7 @@ class AsyncWirePusher:
     async def close(self) -> None:
         """Close the HTTP client and release resources."""
         await self._client.aclose()
-        logger.debug("AsyncWirePusher client closed")
+        logger.debug("AsyncPincho client closed")
 
     async def send(
         self,
@@ -153,7 +153,7 @@ class AsyncWirePusher:
         action_url: Optional[str] = None,
         encryption_password: Optional[str] = None,
     ) -> NotificationResponse:
-        """Send a notification via WirePusher v1 API (async).
+        """Send a notification via Pincho v1 API (async).
 
         Args:
             title: Notification title
@@ -174,10 +174,10 @@ class AsyncWirePusher:
             RateLimitError: Rate limit exceeded (429)
             ServerError: Server error (5xx)
             NetworkError: Network communication failure
-            WirePusherError: Other API errors
+            PinchoError: Other API errors
 
         Example:
-            >>> async with AsyncWirePusher(token='abc12345') as client:
+            >>> async with AsyncPincho(token='abc12345') as client:
             ...     response = await client.send(
             ...         'Deploy Complete',
             ...         'v1.2.3 deployed to production',
@@ -187,7 +187,7 @@ class AsyncWirePusher:
             ...     print(response.status)  # 'success'
 
         Example with encryption:
-            >>> async with AsyncWirePusher(token='abc12345') as client:
+            >>> async with AsyncPincho(token='abc12345') as client:
             ...     response = await client.send(
             ...         'Secure Message',
             ...         'Sensitive data here',
@@ -245,10 +245,10 @@ class AsyncWirePusher:
             RateLimitError: Rate limit exceeded (429)
             ServerError: Server error (5xx)
             NetworkError: Network communication failure
-            WirePusherError: Other API errors
+            PinchoError: Other API errors
 
         Example:
-            >>> async with AsyncWirePusher(token='abc12345') as client:
+            >>> async with AsyncPincho(token='abc12345') as client:
             ...     response = await client.notifai(
             ...         'deployment finished successfully, v2.1.3 is live on prod'
             ...     )
@@ -272,7 +272,7 @@ class AsyncWirePusher:
             NotificationResponse from API
 
         Raises:
-            Various WirePusherError subclasses based on error type
+            Various PinchoError subclasses based on error type
         """
         attempt = 0
         last_exception: Optional[Exception] = None
@@ -369,10 +369,10 @@ class AsyncWirePusher:
 
             except Exception as e:
                 last_exception = e
-                raise WirePusherError(f"Unexpected error: {str(e)}") from e
+                raise PinchoError(f"Unexpected error: {str(e)}") from e
 
         # Should never reach here, but just in case
-        raise WirePusherError(f"Failed after {self.max_retries + 1} attempts") from last_exception
+        raise PinchoError(f"Failed after {self.max_retries + 1} attempts") from last_exception
 
     async def _notifai_with_retry(self, request: NotifAIRequest) -> NotifAIResponse:
         """Send NotifAI request with automatic retry logic.
@@ -384,7 +384,7 @@ class AsyncWirePusher:
             NotifAIResponse from API
 
         Raises:
-            Various WirePusherError subclasses based on error type
+            Various PinchoError subclasses based on error type
         """
         attempt = 0
         last_exception: Optional[Exception] = None
@@ -482,19 +482,19 @@ class AsyncWirePusher:
 
             except Exception as e:
                 last_exception = e
-                raise WirePusherError(f"Unexpected error: {str(e)}") from e
+                raise PinchoError(f"Unexpected error: {str(e)}") from e
 
         # Should never reach here, but just in case
-        raise WirePusherError(f"Failed after {self.max_retries + 1} attempts") from last_exception
+        raise PinchoError(f"Failed after {self.max_retries + 1} attempts") from last_exception
 
-    def _handle_http_error(self, error: httpx.HTTPStatusError) -> WirePusherError:
-        """Convert HTTP status errors to appropriate WirePusher exceptions.
+    def _handle_http_error(self, error: httpx.HTTPStatusError) -> PinchoError:
+        """Convert HTTP status errors to appropriate Pincho exceptions.
 
         Args:
             error: HTTPStatusError from httpx
 
         Returns:
-            Appropriate WirePusherError subclass
+            Appropriate PinchoError subclass
         """
         status_code = error.response.status_code
 
@@ -542,7 +542,7 @@ class AsyncWirePusher:
             return ServerError(f"Server error ({status_code}): {error_message}")
 
         # Other errors
-        return WirePusherError(f"API error ({status_code}): {error_message}")
+        return PinchoError(f"API error ({status_code}): {error_message}")
 
     def _calculate_backoff(self, attempt: int, is_rate_limit: bool) -> float:
         """Calculate exponential backoff delay.

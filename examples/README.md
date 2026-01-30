@@ -1,6 +1,6 @@
-# WirePusher Python Examples
+# Pincho Python Examples
 
-This directory contains practical examples demonstrating various features of the WirePusher Python library.
+This directory contains practical examples demonstrating various features of the Pincho Python library.
 
 ## Prerequisites
 
@@ -8,15 +8,15 @@ Before running examples:
 
 1. **Install the library**:
    ```bash
-   pip install wirepusher_official
+   pip install pincho
    ```
 
 2. **Set your API token**:
    ```bash
-   export WIREPUSHER_TOKEN="your_token_here"
+   export PINCHO_TOKEN="your_token_here"
    ```
 
-3. **Get your token**: Open WirePusher app → Settings → Help → copy token
+3. **Get your token**: Open Pincho app → Settings → Help → copy token
 
 ## Examples Overview
 
@@ -42,7 +42,7 @@ python3 basic_example.py
 **Use case**: High-performance async/await operations
 
 **Demonstrates**:
-- AsyncWirePusher client usage
+- AsyncPincho client usage
 - Async context manager pattern
 - Single async notification
 - Concurrent notification sending with `asyncio.gather()` (10x faster than sequential)
@@ -66,7 +66,7 @@ python3 async_example.py
 
 **Prerequisites**: Set encryption password:
 ```bash
-export WIREPUSHER_ENCRYPTION_PASSWORD="your_password"
+export PINCHO_ENCRYPTION_PASSWORD="your_password"
 ```
 
 **Run**:
@@ -133,25 +133,25 @@ python3 rate_limits.py
 
 ```bash
 # Required
-export WIREPUSHER_TOKEN="abc12345"
+export PINCHO_TOKEN="abc12345"
 
 # Optional overrides
-export WIREPUSHER_TIMEOUT="60"        # Request timeout in seconds
-export WIREPUSHER_MAX_RETRIES="5"     # Retry attempts
+export PINCHO_TIMEOUT="60"        # Request timeout in seconds
+export PINCHO_MAX_RETRIES="5"     # Retry attempts
 ```
 
 ### Error Handling
 
 ```python
-from wirepusher_official import (
-    WirePusher,
+from pincho import (
+    Pincho,
     AuthenticationError,
     ValidationError,
     RateLimitError,
 )
 
 try:
-    with WirePusher() as client:
+    with Pincho() as client:
         client.send('Title', 'Message')
 except AuthenticationError:
     print("Check your token")
@@ -167,20 +167,20 @@ except RateLimitError:
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Now all WirePusher operations will log details
+# Now all Pincho operations will log details
 ```
 
 ## Running All Examples
 
 ```bash
-# Run each example (make sure WIREPUSHER_TOKEN is set)
+# Run each example (make sure PINCHO_TOKEN is set)
 python3 basic_example.py
 python3 async_example.py
 python3 notifai_example.py
 python3 rate_limits.py
 
 # For encryption example, also set:
-export WIREPUSHER_ENCRYPTION_PASSWORD="your_password"
+export PINCHO_ENCRYPTION_PASSWORD="your_password"
 python3 encryption.py
 
 # For Flask example:
@@ -192,5 +192,5 @@ python3 flask_webhook.py
 
 - **Library Documentation**: See main [README.md](../README.md)
 - **Advanced Usage**: See [docs/ADVANCED.md](../docs/ADVANCED.md)
-- **API Reference**: https://wirepusher.dev/help
-- **Issues**: https://gitlab.com/wirepusher/wirepusher-python/-/issues
+- **API Reference**: https://pincho.dev/help
+- **Issues**: https://gitlab.com/pincho/pincho-python/-/issues

@@ -1,21 +1,21 @@
-"""Synchronous WirePusher client."""
+"""Synchronous Pincho client."""
 
 import asyncio
 import logging
 from typing import Any, Coroutine, List, Optional, TypeVar
 
-from wirepusher_official.async_client import AsyncWirePusher
-from wirepusher_official.models import NotifAIResponse, NotificationResponse, RateLimitInfo
+from pincho.async_client import AsyncPincho
+from pincho.models import NotifAIResponse, NotificationResponse, RateLimitInfo
 
 T = TypeVar("T")
 
-logger = logging.getLogger("wirepusher_official")
+logger = logging.getLogger("pincho")
 
 
-class WirePusher:
-    """Synchronous WirePusher client for v1 API.
+class Pincho:
+    """Synchronous Pincho client for v1 API.
 
-    This is a synchronous wrapper around AsyncWirePusher, providing a blocking
+    This is a synchronous wrapper around AsyncPincho, providing a blocking
     API for environments that don't use async/await.
 
     Features:
@@ -27,12 +27,12 @@ class WirePusher:
 
     Example:
         >>> # Basic usage
-        >>> client = WirePusher(token='abc12345')
+        >>> client = Pincho(token='abc12345')
         >>> client.send('Team Alert', 'Server maintenance scheduled')
         >>> client.close()
 
         >>> # Context manager (recommended)
-        >>> with WirePusher(token='abc12345') as client:
+        >>> with Pincho(token='abc12345') as client:
         ...     client.send('Personal Alert', 'Your task is due soon')
     """
 
@@ -43,10 +43,10 @@ class WirePusher:
         max_retries: int = 3,
         base_url: Optional[str] = None,
     ):
-        """Initialize WirePusher client.
+        """Initialize Pincho client.
 
         Args:
-            token: WirePusher API token (required)
+            token: Pincho API token (required)
             timeout: Request timeout in seconds (default: 30.0)
             max_retries: Maximum number of retry attempts (default: 3, set to 0 to disable)
             base_url: Optional custom base URL (mainly for testing)
@@ -56,16 +56,16 @@ class WirePusher:
 
         Examples:
             >>> # Basic usage
-            >>> client = WirePusher(token='abc12345')
+            >>> client = Pincho(token='abc12345')
 
             >>> # With custom settings
-            >>> client = WirePusher(
+            >>> client = Pincho(
             ...     token='abc12345',
             ...     timeout=60.0,
             ...     max_retries=5
             ... )
         """
-        self._async_client = AsyncWirePusher(
+        self._async_client = AsyncPincho(
             token=token,
             timeout=timeout,
             max_retries=max_retries,
@@ -82,7 +82,7 @@ class WirePusher:
         """
         return self._async_client.last_rate_limit
 
-    def __enter__(self) -> "WirePusher":
+    def __enter__(self) -> "Pincho":
         """Context manager entry."""
         return self
 
@@ -115,7 +115,7 @@ class WirePusher:
         action_url: Optional[str] = None,
         encryption_password: Optional[str] = None,
     ) -> NotificationResponse:
-        """Send a notification via WirePusher v1 API.
+        """Send a notification via Pincho v1 API.
 
         Args:
             title: Notification title
@@ -136,10 +136,10 @@ class WirePusher:
             RateLimitError: Rate limit exceeded (429)
             ServerError: Server error (5xx)
             NetworkError: Network communication failure
-            WirePusherError: Other API errors
+            PinchoError: Other API errors
 
         Example:
-            >>> client = WirePusher(token='abc12345')
+            >>> client = Pincho(token='abc12345')
             >>> response = client.send(
             ...     'Deploy Complete',
             ...     'v1.2.3 deployed to production',
@@ -149,7 +149,7 @@ class WirePusher:
             >>> print(response.status)  # 'success'
 
         Example with encryption:
-            >>> with WirePusher(token='abc12345') as client:
+            >>> with Pincho(token='abc12345') as client:
             ...     response = client.send(
             ...         'Secure Message',
             ...         'Sensitive data here',
@@ -193,10 +193,10 @@ class WirePusher:
             RateLimitError: Rate limit exceeded (429)
             ServerError: Server error (5xx)
             NetworkError: Network communication failure
-            WirePusherError: Other API errors
+            PinchoError: Other API errors
 
         Example:
-            >>> with WirePusher(token='abc12345') as client:
+            >>> with Pincho(token='abc12345') as client:
             ...     response = client.notifai(
             ...         'deployment finished successfully, v2.1.3 is live on prod'
             ...     )

@@ -1,4 +1,4 @@
-"""Input validation utilities for WirePusher library."""
+"""Input validation utilities for Pincho library."""
 
 import re
 from typing import List, Optional

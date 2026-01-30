@@ -1,8 +1,8 @@
-"""Custom exceptions for WirePusher library."""
+"""Custom exceptions for Pincho library."""
 
 
-class WirePusherError(Exception):
-    """Base exception for WirePusher library.
+class PinchoError(Exception):
+    """Base exception for Pincho library.
 
     All other exceptions in this library inherit from this class.
 
@@ -13,7 +13,7 @@ class WirePusherError(Exception):
     is_retryable: bool = False
 
 
-class AuthenticationError(WirePusherError):
+class AuthenticationError(PinchoError):
     """Raised when authentication fails.
 
     This typically occurs when:
@@ -27,7 +27,7 @@ class AuthenticationError(WirePusherError):
     is_retryable = False
 
 
-class ValidationError(WirePusherError):
+class ValidationError(PinchoError):
     """Raised when request validation fails.
 
     This typically occurs when:
@@ -41,7 +41,7 @@ class ValidationError(WirePusherError):
     is_retryable = False
 
 
-class RateLimitError(WirePusherError):
+class RateLimitError(PinchoError):
     """Raised when rate limit is exceeded (HTTP 429).
 
     This error IS retryable with exponential backoff.
@@ -51,7 +51,7 @@ class RateLimitError(WirePusherError):
     is_retryable = True
 
 
-class ServerError(WirePusherError):
+class ServerError(PinchoError):
     """Raised when server returns 5xx error.
 
     This typically indicates temporary server issues.
@@ -61,7 +61,7 @@ class ServerError(WirePusherError):
     is_retryable = True
 
 
-class NetworkError(WirePusherError):
+class NetworkError(PinchoError):
     """Raised when network communication fails.
 
     This typically occurs when:

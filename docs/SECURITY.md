@@ -10,7 +10,7 @@ We release patches for security vulnerabilities for the following versions:
 
 ## Reporting a Vulnerability
 
-The WirePusher team takes security bugs seriously. We appreciate your efforts to responsibly disclose your findings.
+The Pincho team takes security bugs seriously. We appreciate your efforts to responsibly disclose your findings.
 
 ### How to Report
 
@@ -19,7 +19,7 @@ The WirePusher team takes security bugs seriously. We appreciate your efforts to
 Instead, please report security vulnerabilities by:
 
 1. **Opening a confidential issue** on GitLab:
-   - Go to https://gitlab.com/wirepusher/python-sdk/-/issues/new
+   - Go to https://gitlab.com/pincho/python-sdk/-/issues/new
    - Check the "This issue is confidential" checkbox
    - Provide detailed information about the vulnerability
 
@@ -48,17 +48,17 @@ Instead, please report security vulnerabilities by:
 
 ### Security Best Practices for Users
 
-When using the WirePusher Python library:
+When using the Pincho Python library:
 
 1. **Keep dependencies updated**: Regularly update the library and its dependencies
    ```bash
-   pip install --upgrade wirepusher
+   pip install --upgrade pincho
    ```
 
 2. **Protect your credentials**: Never commit API tokens to version control
    ```python
    # Good: Use environment variables
-   token = os.getenv("WIREPUSHER_TOKEN")
+   token = os.getenv("PINCHO_TOKEN")
 
    # Bad: Hardcoded credentials
    token = "abc12345"  # Don't do this!
@@ -80,7 +80,7 @@ When using the WirePusher Python library:
 
 #### API Token Security
 
-- WirePusher API tokens (8-character strings) are sensitive credentials
+- Pincho API tokens (8-character strings) are sensitive credentials
 - Store them securely (environment variables, secret managers)
 - Rotate tokens if compromised
 - Use token-specific permissions when available
@@ -118,7 +118,7 @@ We recognize security researchers who responsibly disclose vulnerabilities:
 
 ## Questions?
 
-If you have questions about this security policy, please open a public issue or contact us at **support@wirepusher.dev**.
+If you have questions about this security policy, please open a public issue or contact us at **support@pincho.dev**.
 
 ---
 
