@@ -39,7 +39,7 @@ client.send(
 response = client.notifai('deployment finished, v2.1.3 is live')
 print(response.notification)  # AI-generated title, message, tags
 
-# Encrypted messages
+# Encrypted notifications (title, message, URLs encrypted; type, tags unencrypted)
 client.send(
     title='Security Alert',
     message='Sensitive data',

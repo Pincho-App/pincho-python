@@ -131,7 +131,7 @@ Levels:
 **AES-128-CBC** encryption matching mobile app:
 - SHA1-based key derivation (for app compatibility)
 - Custom Base64 encoding (URL-safe: `-` `_` `.` instead of `+` `/` `=`)
-- Only message encrypted (title, type, tags remain visible)
+- Encrypts title, message, imageURL, actionURL (type, tags remain visible)
 - Password must match type configuration in app
 
 Implementation: `crypto.py`

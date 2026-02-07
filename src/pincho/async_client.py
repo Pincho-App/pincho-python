@@ -162,8 +162,10 @@ class AsyncPincho:
             tags: Optional list of tags (will be normalized: lowercased, trimmed, deduplicated)
             image_url: Optional image URL to display with notification
             action_url: Optional URL to open when notification is tapped
-            encryption_password: Optional password for AES-128-CBC encryption
-                (must match type configuration in app)
+            encryption_password: Optional password for AES-128-CBC encryption.
+                When provided, encrypts title, message, imageURL, and actionURL.
+                Type and tags remain unencrypted for filtering/routing.
+                Password must match type configuration in app.
 
         Returns:
             NotificationResponse with status and message
@@ -201,21 +203,31 @@ class AsyncPincho:
             logger.debug("Tags normalized: %s -> %s", tags, normalized_tags)
 
         # Handle encryption if password provided
+        # Encrypted fields: title, message, imageURL, actionURL
+        # NOT encrypted: type, tags (needed for filtering/routing)
+        final_title = title
         final_message = message
+        final_image_url = image_url
+        final_action_url = action_url
         iv_hex: Optional[str] = None
 
         if encryption_password:
             iv_bytes, iv_hex = generate_iv()
+            final_title = encrypt_message(title, encryption_password, iv_bytes)
             final_message = encrypt_message(message, encryption_password, iv_bytes)
-            logger.debug("Message encrypted with IV: %s", iv_hex)
+            if image_url:
+                final_image_url = encrypt_message(image_url, encryption_password, iv_bytes)
+            if action_url:
+                final_action_url = encrypt_message(action_url, encryption_password, iv_bytes)
+            logger.debug("Encrypted title, message, imageURL, actionURL with IV: %s", iv_hex)
 
         request = NotificationRequest(
-            title=title,
+            title=final_title,
             message=final_message,
             type=type,
             tags=normalized_tags,
-            imageURL=image_url,
-            actionURL=action_url,
+            imageURL=final_image_url,
+            actionURL=final_action_url,
             iv=iv_hex,
         )
 

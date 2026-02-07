@@ -124,8 +124,10 @@ class Pincho:
             tags: Optional list of tags (will be normalized: lowercased, trimmed, deduplicated)
             image_url: Optional image URL to display with notification
             action_url: Optional URL to open when notification is tapped
-            encryption_password: Optional password for AES-128-CBC encryption
-                (must match type configuration in app)
+            encryption_password: Optional password for AES-128-CBC encryption.
+                When provided, encrypts title, message, imageURL, and actionURL.
+                Type and tags remain unencrypted for filtering/routing.
+                Password must match type configuration in app.
 
         Returns:
             NotificationResponse with status and message

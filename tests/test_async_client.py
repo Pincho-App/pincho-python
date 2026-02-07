@@ -782,3 +782,79 @@ class TestAsyncPincho:
             # Should have made 3 attempts (initial + 2 retries)
             requests = httpx_mock.get_requests()
             assert len(requests) == 3
+
+    @pytest.mark.asyncio
+    async def test_send_with_encryption_encrypts_all_fields(self, httpx_mock: HTTPXMock) -> None:
+        """Test that encryption_password encrypts title, message, imageURL, actionURL."""
+        import json
+
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.pincho.app/send",
+            json={"status": "success", "message": "Notification sent"},
+            status_code=200,
+        )
+
+        async with AsyncPincho(token="abc12345") as client:
+            await client.send(
+                "Plain Title",
+                "Plain message",
+                type="secure",
+                tags=["test"],
+                image_url="https://example.com/image.png",
+                action_url="https://example.com/action",
+                encryption_password="testpassword123",
+            )
+
+        request = httpx_mock.get_request()
+        assert request is not None
+        body = json.loads(request.content.decode())
+
+        # IV should be present (32 hex chars)
+        assert "iv" in body
+        assert len(body["iv"]) == 32
+
+        # All encrypted fields should NOT be plaintext
+        assert body["title"] != "Plain Title"
+        assert body["message"] != "Plain message"
+        assert body["imageURL"] != "https://example.com/image.png"
+        assert body["actionURL"] != "https://example.com/action"
+
+        # Type and tags should remain unencrypted
+        assert body["type"] == "secure"
+        assert body["tags"] == ["test"]
+
+    @pytest.mark.asyncio
+    async def test_send_with_encryption_optional_urls(self, httpx_mock: HTTPXMock) -> None:
+        """Test encryption works when imageURL and actionURL are not provided."""
+        import json
+
+        httpx_mock.add_response(
+            method="POST",
+            url="https://api.pincho.app/send",
+            json={"status": "success", "message": "Notification sent"},
+            status_code=200,
+        )
+
+        async with AsyncPincho(token="abc12345") as client:
+            await client.send(
+                "Secure Title",
+                "Secure message",
+                encryption_password="testpassword123",
+            )
+
+        request = httpx_mock.get_request()
+        assert request is not None
+        body = json.loads(request.content.decode())
+
+        # IV should be present
+        assert "iv" in body
+        assert len(body["iv"]) == 32
+
+        # Title and message should be encrypted
+        assert body["title"] != "Secure Title"
+        assert body["message"] != "Secure message"
+
+        # URLs should not be in payload (they were None)
+        assert "imageURL" not in body
+        assert "actionURL" not in body

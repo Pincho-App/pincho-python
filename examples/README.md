@@ -56,12 +56,12 @@ python3 async_example.py
 
 ### encryption.py
 
-**Use case**: Secure notifications with encrypted messages
+**Use case**: Secure notifications with encrypted content
 
 **Demonstrates**:
-- AES-128-CBC message encryption
+- AES-128-CBC encryption for title, message, imageURL, actionURL
 - Setting encryption password (must match app configuration)
-- What gets encrypted (message only) vs. what stays readable (title, type, tags)
+- What gets encrypted vs. what stays readable (type, tags)
 - Multiple encryption scenarios
 
 **Prerequisites**: Set encryption password:

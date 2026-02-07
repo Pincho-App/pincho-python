@@ -1,8 +1,8 @@
 """Example demonstrating encrypted notifications with Pincho library.
 
-This example shows how to send encrypted notifications where only the message
-content is encrypted. Title, type, tags, and other metadata remain unencrypted
-for filtering and display purposes.
+This example shows how to send encrypted notifications where sensitive content
+is encrypted. The encrypted fields are: title, message, imageURL, actionURL.
+Type and tags remain unencrypted for filtering and routing purposes.
 
 Requirements:
     - Pincho app installed with configured notification type
@@ -35,7 +35,7 @@ def main():
     print("Example 1: Sending encrypted notification...")
     with Pincho(token=token) as client:
         response = client.send(
-            title="Secure Alert",  # NOT encrypted (for display)
+            title="Secure Alert",  # Encrypted
             message="Your credit card was charged $49.99",  # Encrypted
             type="secure",  # NOT encrypted (needed for password lookup)
             encryption_password=encryption_password,  # Must match app configuration
@@ -47,25 +47,25 @@ def main():
     print("Example 2: Encrypted notification with tags and metadata...")
     with Pincho(token=token) as client:
         response = client.send(
-            title="Security Alert",
-            message="Unauthorized login attempt detected from IP 192.168.1.100",
-            type="security",
-            tags=["critical", "security", "login"],  # NOT encrypted
+            title="Security Alert",  # Encrypted
+            message="Unauthorized login attempt detected from IP 192.168.1.100",  # Encrypted
+            type="security",  # NOT encrypted (for filtering)
+            tags=["critical", "security", "login"],  # NOT encrypted (for filtering)
             encryption_password=encryption_password,
         )
         print(f"  Status: {response.status}\n")
 
     # Example 3: Encrypted notification with image and action URL
-    print("Example 3: Encrypted notification with additional metadata...")
+    print("Example 3: Encrypted notification with URLs...")
     with Pincho(token=token) as client:
         response = client.send(
-            title="Payment Alert",
-            message="Your subscription has been renewed for $9.99",
-            type="billing",
-            tags=["payment", "subscription"],
+            title="Payment Alert",  # Encrypted
+            message="Your subscription has been renewed for $9.99",  # Encrypted
+            type="billing",  # NOT encrypted
+            tags=["payment", "subscription"],  # NOT encrypted
             encryption_password=encryption_password,
-            image_url="https://example.com/payment-icon.png",
-            action_url="https://example.com/billing/history",
+            image_url="https://example.com/payment-icon.png",  # Encrypted
+            action_url="https://example.com/billing/history",  # Encrypted
         )
         print(f"  Status: {response.status}\n")
 
@@ -94,12 +94,12 @@ def main():
     except Exception as e:
         print(f"  Error: {e}\n")
 
-    print("✓ All examples completed!")
+    print("All examples completed!")
     print("\nKey points:")
-    print("  - Only the 'message' field is encrypted")
-    print("  - Title, type, tags, imageURL, actionURL remain unencrypted")
+    print("  - Encrypted fields: title, message, imageURL, actionURL")
+    print("  - NOT encrypted: type, tags (needed for filtering/routing)")
     print("  - Encryption password must match type configuration in app")
-    print("  - Each encrypted message gets a unique random IV")
+    print("  - Each encrypted notification gets a unique random IV")
     print("  - Unencrypted messages work normally (backward compatible)")
 
 
