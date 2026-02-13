@@ -4,7 +4,7 @@ Context file for AI-powered development assistance on the Pincho Python library 
 
 ## Project Overview
 
-**Pincho Python Library** is a Python client library for sending push notifications via [Pincho](https://pincho.dev).
+**Pincho Python Library** is a Python client library for sending push notifications via [Pincho](https://pincho.app).
 
 - **Language**: Python 3.8+
 - **Framework**: httpx (HTTP client with HTTP/2 support)
@@ -354,7 +354,7 @@ Example: `Invalid parameters: Title is required [missing_required_field] (parame
 
 ## Links
 
-- **Repository**: https://gitlab.com/pincho/pincho-python
-- **Issues**: https://gitlab.com/pincho/pincho-python/-/issues
-- **API Docs**: https://pincho.dev/help
-- **App**: https://pincho.dev
+- **Repository**: https://github.com/Pincho-App/pincho-python
+- **Issues**: https://github.com/Pincho-App/pincho-python/issues
+- **API Docs**: https://pincho.app/help
+- **App**: https://pincho.app

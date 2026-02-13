@@ -192,5 +192,5 @@ python3 flask_webhook.py
 
 - **Library Documentation**: See main [README.md](../README.md)
 - **Advanced Usage**: See [docs/ADVANCED.md](../docs/ADVANCED.md)
-- **API Reference**: https://pincho.dev/help
-- **Issues**: https://gitlab.com/pincho/pincho-python/-/issues
+- **API Reference**: https://pincho.app/help
+- **Issues**: https://github.com/Pincho-App/pincho-python/issues

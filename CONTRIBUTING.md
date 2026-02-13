@@ -10,7 +10,7 @@ Be respectful and constructive. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for
 
 ```bash
 # Get the code
-git clone https://gitlab.com/pincho/pincho-python.git
+git clone https://github.com/Pincho-App/pincho-python.git
 cd pincho-python
 
 # Create virtual environment
@@ -36,7 +36,7 @@ ruff check src/ tests/
 
 ### Report a Bug
 
-[Check existing issues](https://gitlab.com/pincho/pincho-python/-/issues) first, then create a new one with:
+[Check existing issues](https://github.com/Pincho-App/pincho-python/issues) first, then create a new one with:
 
 - What you did (exact code)
 - What happened vs what you expected

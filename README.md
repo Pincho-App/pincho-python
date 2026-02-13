@@ -1,6 +1,6 @@
 # Pincho Python Library
 
-Official Python client for [Pincho](https://pincho.dev) push notifications.
+Official Python client for [Pincho](https://pincho.app) push notifications.
 
 ## Installation
 
@@ -112,8 +112,8 @@ See [Advanced Documentation](docs/ADVANCED.md) for detailed rate limit monitorin
 ## Links
 
 - **Get Token**: App → Settings → Help → copy token
-- **Documentation**: https://pincho.dev/help
-- **Repository**: https://gitlab.com/pincho/pincho-python
+- **Documentation**: https://pincho.app/help
+- **Repository**: https://github.com/Pincho-App/pincho-python
 - **PyPI**: https://pypi.org/project/pincho/
 
 ## License

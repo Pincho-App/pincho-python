@@ -18,9 +18,8 @@ The Pincho team takes security bugs seriously. We appreciate your efforts to res
 
 Instead, please report security vulnerabilities by:
 
-1. **Opening a confidential issue** on GitLab:
-   - Go to https://gitlab.com/pincho/python-sdk/-/issues/new
-   - Check the "This issue is confidential" checkbox
+1. **Opening a security advisory** on GitHub:
+   - Go to https://github.com/Pincho-App/pincho-python/security/advisories/new
    - Provide detailed information about the vulnerability
 
 2. **Include the following information**:
@@ -118,7 +117,7 @@ We recognize security researchers who responsibly disclose vulnerabilities:
 
 ## Questions?
 
-If you have questions about this security policy, please open a public issue or contact us at **support@pincho.dev**.
+If you have questions about this security policy, please open a public issue or contact us at **support@pincho.app**.
 
 ---
 

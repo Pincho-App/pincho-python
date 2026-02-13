@@ -114,5 +114,5 @@ logging.basicConfig(level=logging.DEBUG)
 ### Dependencies
 - httpx >= 0.24.0 (only runtime dependency)
 
-[Unreleased]: https://gitlab.com/pincho/python-sdk/-/compare/v1.0.0...main
-[1.0.0]: https://gitlab.com/pincho/python-sdk/-/tags/v1.0.0
+[Unreleased]: https://github.com/Pincho-App/pincho-python/compare/v1.0.0...main
+[1.0.0]: https://github.com/Pincho-App/pincho-python/releases/tag/v1.0.0
