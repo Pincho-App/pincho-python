@@ -1,3 +1,9 @@
+---
+name: Bug report
+about: Something is broken or behaves unexpectedly
+labels: [bug]
+---
+
 ## Bug Description
 
 <!-- A clear and concise description of what the bug is -->
@@ -54,5 +60,3 @@ from pincho import Pincho
 - [ ] I have tested with the latest version of the library
 - [ ] I have provided a minimal, reproducible example
 - [ ] I have included the full error traceback
-
-/label ~bug

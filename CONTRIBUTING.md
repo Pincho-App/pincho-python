@@ -78,7 +78,7 @@ Create an issue explaining:
 6. **Format**: `black src/ tests/ && mypy src/pincho && ruff check src/ tests/`
 7. **Commit** with a clear message
 8. **Push** to your fork
-9. **Open a Merge Request**
+9. **Open a Pull Request**
 
 ## Code Guidelines
 
@@ -150,7 +150,7 @@ pytest --cov=pincho && mypy src/pincho && black --check src/ tests/ && ruff chec
 ## Need Help?
 
 - **Architecture questions?** See [CLAUDE.md](CLAUDE.md)
-- **Stuck?** Open an issue or ask in your MR
+- **Stuck?** Open an issue or ask in your PR
 
 ## License
 

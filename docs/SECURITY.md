@@ -14,7 +14,7 @@ The Pincho team takes security bugs seriously. We appreciate your efforts to res
 
 ### How to Report
 
-**Please do NOT report security vulnerabilities through public GitHub/GitLab issues.**
+**Please do NOT report security vulnerabilities through public GitHub issues.**
 
 Instead, please report security vulnerabilities by:
 
